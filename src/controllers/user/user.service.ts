@@ -12,7 +12,7 @@ export class UserService {
 
   async getAll() {
     const users = await this.userModel.findAll();
-    return ResponseDto.send(users);
+    return new ResponseDto({ data: users });
   }
 
   findOne(id: number) {
