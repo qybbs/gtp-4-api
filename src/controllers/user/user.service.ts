@@ -1,11 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from 'src/common/models';
+import { ResponseDto } from 'src/common/dto';
 
 @Injectable()
 export class UserService {
-  getAll() {
-    return 'Find All User';
+  constructor(
+    @Inject('USER_REPOSITORY') private readonly userModel: typeof User,
+  ) {}
+
+  async getAll() {
+    const users = await this.userModel.findAll();
+    return ResponseDto.send(users);
   }
 
   findOne(id: number) {
