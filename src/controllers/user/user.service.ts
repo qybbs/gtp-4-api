@@ -10,9 +10,9 @@ export class UserService {
     @Inject('USER_REPOSITORY') private readonly userModel: typeof User,
   ) {}
 
-  async getAll() {
+  async getAll(): Promise<ResponseDto<User[]>> {
     const users = await this.userModel.findAll();
-    return ResponseDto.send(users);
+    return new ResponseDto<User[]>({ data: users });
   }
 
   findOne(id: number) {
