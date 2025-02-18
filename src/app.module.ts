@@ -5,7 +5,10 @@ import { UserModule } from './controllers/user/user.module';
 import { MysqlModule } from './common/modules';
 
 @Module({
-  imports: [MysqlModule, UserModule],
+  imports: [
+    MysqlModule,
+    UserModule, 
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

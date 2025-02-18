@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
+import { useContainer } from 'class-validator';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,7 @@ async function bootstrap() {
       },
     ],
   });
+  useContainer(app.select(AppModule), { fallbackOnErrors: true })
   const config = new DocumentBuilder()
     .setTitle('GTP')
     .setDescription('GTP API Documentation')
