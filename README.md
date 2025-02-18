@@ -29,7 +29,11 @@
 ## Project setup
 
 ```bash
+# klo pake yarn
 $ yarn install
+
+# klo pake npm
+$ npm install
 ```
 
 ## Compile and run the project
