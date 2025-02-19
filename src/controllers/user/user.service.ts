@@ -21,6 +21,11 @@ export class UserService {
     return new ResponseDto<User>({ data: user });
   }
 
+  async findOneByUsername(username: string): Promise<ResponseDto<User>> {
+    const user = await this.userModel.findOne({ where: { username } });
+    return new ResponseDto<User>({ data: user });
+  }
+
   async create(createUserDto: CreateUserDto) {
     const salt = bcrypt.genSalt();
     const hash = await bcrypt.hash(createUserDto.password, await salt);
