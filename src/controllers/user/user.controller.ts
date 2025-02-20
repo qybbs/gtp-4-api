@@ -10,18 +10,21 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { 
-  ApiBadRequestResponse, 
-  ApiCreatedResponse, 
-  ApiNotFoundResponse, 
-  ApiOkResponse, 
-  ApiOperation 
+import {
+  ApiBadRequestResponse,
+  ApiCreatedResponse,
+  ApiHeader,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
 } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @ApiOperation({ summary: 'Get all user' })
   @Get()
   @ApiOkResponse({
@@ -32,6 +35,10 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Get one user' })
+  @ApiHeader({
+    name: 'Authorization',
+    description: 'Bearer token',
+  })
   @Get(':id')
   @ApiOkResponse({
     isArray: false,

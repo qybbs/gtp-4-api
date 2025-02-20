@@ -11,12 +11,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api', {
     exclude: [
       {
-        path: '/',
+        path: 'auth/login',
+        method: RequestMethod.POST,
+      },
+      {
+        path: 'auth/profile',
         method: RequestMethod.GET,
       },
     ],
   });
-  useContainer(app.select(AppModule), { fallbackOnErrors: true })
+  useContainer(app.select(AppModule), { fallbackOnErrors: true });
   const config = new DocumentBuilder()
     .setTitle('GTP')
     .setDescription('GTP API Documentation')
