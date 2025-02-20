@@ -4,6 +4,8 @@ import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { JwtService } from '@nestjs/jwt';
+import { RegisterDto } from './dto/register.dto';
+import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
 
 @Injectable()
 export class AuthService {
@@ -22,5 +24,35 @@ export class AuthService {
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async register(registerDto: RegisterDto) {
+    if (registerDto.password !== registerDto.confpassword) {
+      return new ErrorResponseDto({
+        message: 'Passwords do not match.',
+        statusCode: 400,
+        error: 'Bad Request',
+      });
+    }
+    const salt = bcrypt.genSalt();
+    const hash = await bcrypt.hash(registerDto.password, await salt);
+    const user = {
+      username: registerDto.username,
+      email: registerDto.email,
+      name: registerDto.name,
+      password: hash,
+    };
+    try {
+      const response = await this.userService.create({ ...user });
+      return new ResponseDto({ data: response });
+    } catch (error) {
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        return new ErrorResponseDto({
+          message: 'User with this email or username already exists.',
+          statusCode: 400,
+          error: 'Bad Request',
+        });
+      }
+    }
   }
 }

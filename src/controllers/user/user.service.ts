@@ -32,25 +32,23 @@ export class UserService {
     createUserDto.password = hash;
     try {
       const response = await this.userModel.create({ ...createUserDto });
-      return new ResponseDto({ data: response });  
+      return new ResponseDto({ data: response });
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
         return new ErrorResponseDto({
           message: 'User with this email or username already exists.',
           statusCode: 400,
           error: 'Bad Request',
-        })
+        });
       }
     }
-    const response = await this.userModel.create({ ...createUserDto });
-    return new ResponseDto({ data: response });
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     try {
       const response = await this.userModel.update(
         { ...updateUserDto },
-        { where: { id } }
+        { where: { id } },
       );
       if (response[0] === 0) {
         throw new NotFoundException(`User with id ${id} not found`);
