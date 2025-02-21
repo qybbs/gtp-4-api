@@ -9,6 +9,8 @@ import {
 } from '@nestjs/common';
 import { EventService } from './event.service';
 import { ApiOperation } from '@nestjs/swagger';
+import { UpdateEventDto } from './dto/update-event.dto';
+import { CreateEventDto } from './dto/create-event.dto';
 
 @Controller('event')
 export class EventController {
@@ -28,13 +30,13 @@ export class EventController {
 
   @ApiOperation({ summary: 'Post resource event' })
   @Post()
-  create(@Body() CreateEventDto: any) {
+  create(@Body() CreateEventDto: CreateEventDto) {
     return this.eventService.create(CreateEventDto);
   }
 
   @ApiOperation({ summary: 'Update resource event' })
   @Patch(':id')
-  update(@Param('id') id: number, @Body() UpdateEventDto: any) {
+  update(@Param('id') id: number, @Body() UpdateEventDto: UpdateEventDto) {
     return this.eventService.update(id, UpdateEventDto);
   }
 

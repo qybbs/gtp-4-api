@@ -16,6 +16,8 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
+import { CreateProjectDto } from './dto/create-user.dto';
+import { UpdateProjectDto } from './dto/update-project.dto';
 
 @Controller('project')
 export class ProjectController {
@@ -53,7 +55,7 @@ export class ProjectController {
     isArray: true,
   })
   @ApiBadRequestResponse({ description: 'Bad Request' })
-  create(@Body() CreateProjectDto: Record<string, any>) {
+  create(@Body() CreateProjectDto: CreateProjectDto) {
     return this.projectService.create(CreateProjectDto);
   }
 
@@ -66,10 +68,7 @@ export class ProjectController {
   @ApiNotFoundResponse({
     description: 'Not Found',
   })
-  update(
-    @Param('id') id: number,
-    @Body() UpdateProjectDto: Record<string, any>,
-  ) {
+  update(@Param('id') id: number, @Body() UpdateProjectDto: UpdateProjectDto) {
     return this.projectService.update(id, UpdateProjectDto);
   }
 
