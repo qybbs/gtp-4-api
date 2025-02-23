@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiHeader,
   ApiNotFoundResponse,
@@ -24,6 +25,7 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all project' })
   @Get()
   @ApiOkResponse({
@@ -33,6 +35,7 @@ export class ProjectController {
     return this.projectService.getAll();
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get one project' })
   @ApiHeader({
     name: 'Authorization',
@@ -49,6 +52,7 @@ export class ProjectController {
     return this.projectService.findOne(id);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Post resource project' })
   @Post()
   @ApiCreatedResponse({
@@ -60,6 +64,7 @@ export class ProjectController {
     return this.projectService.create(CreateProjectDto);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update resource project' })
   @Patch(':id')
   @ApiOkResponse({
@@ -73,6 +78,7 @@ export class ProjectController {
     return this.projectService.update(id, UpdateProjectDto);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete resource project' })
   @Delete(':id')
   @ApiOkResponse({
@@ -86,6 +92,7 @@ export class ProjectController {
     return this.projectService.delete(id);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Invite project collaborator' })
   @Post('/collaborator')
   @ApiCreatedResponse({
@@ -100,6 +107,7 @@ export class ProjectController {
     return this.projectService.addCollaborator({ userId, projectId });
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Remove project collaborator' })
   @Delete('/collaborator')
   @ApiOkResponse({

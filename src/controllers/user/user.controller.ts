@@ -12,6 +12,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiCreatedResponse,
   ApiHeader,
   ApiNotFoundResponse,
@@ -23,6 +24,7 @@ import {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all user' })
   @Get()
   @ApiOkResponse({
@@ -32,6 +34,7 @@ export class UserController {
     return this.userService.getAll();
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get one user' })
   @ApiHeader({
     name: 'Authorization',
@@ -48,6 +51,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Post resource user' })
   @Post()
   @ApiCreatedResponse({
@@ -59,6 +63,7 @@ export class UserController {
     return this.userService.create(CreateUserDto);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update resource user' })
   @Patch(':id')
   @ApiOkResponse({
@@ -73,6 +78,7 @@ export class UserController {
     return this.userService.update(+id, updateUserDto);
   }
 
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete resource user' })
   @Delete(':id')
   @ApiOkResponse({
