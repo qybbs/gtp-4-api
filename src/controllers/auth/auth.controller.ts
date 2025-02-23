@@ -6,14 +6,12 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Public } from 'src/common/decorators';
 import { RegisterDto } from './dto/register.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Public()
   @ApiOperation({ summary: 'Login' })
   @Post('login')
   @ApiBadRequestResponse({ description: 'Bad Request' })
@@ -22,7 +20,6 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  @Public()
   @ApiOperation({ summary: 'Register' })
   @ApiBadRequestResponse({ description: 'Bad Request' })
   @ApiOkResponse({ description: 'Registered Succesfully!' })

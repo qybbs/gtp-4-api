@@ -18,13 +18,11 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger';
-import { Public } from 'src/common/decorators';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Public()
   @ApiOperation({ summary: 'Get all user' })
   @Get()
   @ApiOkResponse({
