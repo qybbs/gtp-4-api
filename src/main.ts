@@ -15,8 +15,8 @@ async function bootstrap() {
         method: RequestMethod.POST,
       },
       {
-        path: 'auth/profile',
-        method: RequestMethod.GET,
+        path: 'auth/register',
+        method: RequestMethod.POST,
       },
     ],
   });

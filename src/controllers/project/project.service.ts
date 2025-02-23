@@ -1,10 +1,17 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
 import { Project } from 'src/common/models';
 import { CreateProjectDto } from './dto/create-user.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectCollaborator } from 'src/common/models/collaborator.model';
 import { CollaboratorDto } from './dto/collaborator.dto';
+import { Request } from 'express';
+import { where } from 'sequelize';
 
 @Injectable()
 export class ProjectService {
@@ -14,9 +21,14 @@ export class ProjectService {
     private readonly collaboratorModel: typeof ProjectCollaborator,
   ) {}
 
-  async getAll(): Promise<ResponseDto<Project[]> | ErrorResponseDto> {
+  async getAll(
+    req: Request,
+  ): Promise<ResponseDto<Project[]> | ErrorResponseDto> {
     try {
-      const projects = await this.projectModel.findAll();
+      const userId = req['user'].id;
+      const projects = await this.projectModel.findAll({
+        where: { userId },
+      });
       return new ResponseDto<Project[]>({ data: projects });
     } catch (error) {
       return new ErrorResponseDto({
@@ -41,10 +53,15 @@ export class ProjectService {
   }
 
   async create(
-    CreateProjectDto: CreateProjectDto,
+    createProjectDto: CreateProjectDto,
+    req: Request,
   ): Promise<ResponseDto | ErrorResponseDto> {
     try {
-      const response = await this.projectModel.create({ ...CreateProjectDto });
+      const userId = req['user'].id;
+      const response = await this.projectModel.create({
+        ...createProjectDto,
+        userId,
+      });
       return new ResponseDto({ data: response });
     } catch (error) {
       if (error.name === 'SequelizeUniqueConstraintError') {
@@ -92,6 +109,23 @@ export class ProjectService {
       return new ResponseDto({
         data: `Project with id ${id} successfully deleted`,
       });
+    } catch (error) {
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
+    }
+  }
+
+  async getCollaborators(
+    projectId: number,
+  ): Promise<ResponseDto | ErrorResponseDto> {
+    try {
+      const collaborators = await this.collaboratorModel.findAll({
+        where: { projectId },
+      });
+      return new ResponseDto<ProjectCollaborator[]>({ data: collaborators });
     } catch (error) {
       return new ErrorResponseDto({
         message: error.message,

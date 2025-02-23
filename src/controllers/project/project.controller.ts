@@ -7,6 +7,8 @@ import {
   Patch,
   Post,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -18,9 +20,13 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { ProjectService } from './project.service';
+import { Request } from 'express';
 import { CreateProjectDto } from './dto/create-user.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { ProjectGuard } from 'src/common/guards';
+import { Public } from 'src/common/decorators';
 
+@UseGuards(ProjectGuard)
 @Controller('project')
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
@@ -31,8 +37,8 @@ export class ProjectController {
   @ApiOkResponse({
     isArray: true,
   })
-  findAll() {
-    return this.projectService.getAll();
+  findAll(@Req() req: Request) {
+    return this.projectService.getAll(req);
   }
 
   @ApiBearerAuth()
@@ -52,6 +58,7 @@ export class ProjectController {
     return this.projectService.findOne(id);
   }
 
+  @Public()
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Post resource project' })
   @Post()
@@ -59,9 +66,8 @@ export class ProjectController {
     description: 'Created Succesfully',
     isArray: true,
   })
-  @ApiBadRequestResponse({ description: 'Bad Request' })
-  create(@Body() CreateProjectDto: CreateProjectDto) {
-    return this.projectService.create(CreateProjectDto);
+  create(@Body() CreateProjectDto: CreateProjectDto, @Req() req: Request) {
+    return this.projectService.create(CreateProjectDto, req);
   }
 
   @ApiBearerAuth()
@@ -90,6 +96,17 @@ export class ProjectController {
   })
   delete(@Param('id') id: number) {
     return this.projectService.delete(id);
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get project collaborators' })
+  @Get('/collaborators/:projectId')
+  @ApiOkResponse({
+    description: 'Get Collaborators Succesfully',
+    isArray: true,
+  })
+  getCollaborators(@Param('projectId') projectId: number) {
+    return this.projectService.getCollaborators(projectId);
   }
 
   @ApiBearerAuth()
