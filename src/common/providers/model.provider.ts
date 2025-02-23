@@ -14,7 +14,13 @@ export const eventProvider = {
   provide: 'EVENT_REPOSITORY',
   useValue: Event,
 };
+
 export const taskProvider = {
   provide: 'TASK_REPOSITORY',
+  useValue: Task,
+};
+
+export const collaboratorProvider = {
+  provide: 'COLLABORATOR_REPOSITORY',
   useValue: Task,
 };

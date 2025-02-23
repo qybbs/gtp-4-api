@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -83,5 +84,33 @@ export class ProjectController {
   })
   delete(@Param('id') id: number) {
     return this.projectService.delete(id);
+  }
+
+  @ApiOperation({ summary: 'Invite project collaborator' })
+  @Post('/collaborator')
+  @ApiCreatedResponse({
+    description: 'Invite Succesfully',
+    isArray: true,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  inviteCollaborator(
+    @Query('userId') userId: number,
+    @Query('projectId') projectId: number,
+  ) {
+    return this.projectService.addCollaborator({ userId, projectId });
+  }
+
+  @ApiOperation({ summary: 'Remove project collaborator' })
+  @Delete('/collaborator')
+  @ApiOkResponse({
+    description: 'Remove Succesfully',
+    isArray: false,
+  })
+  @ApiBadRequestResponse({ description: 'Bad Request' })
+  removeCollaborator(
+    @Query('userId') userId: number,
+    @Query('projectId') projectId: number,
+  ) {
+    return this.projectService.removeCollaborator({ userId, projectId });
   }
 }

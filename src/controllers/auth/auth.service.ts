@@ -18,6 +18,7 @@ export class AuthService {
     const user = await this.userService.findOneByUsername(loginDto.username);
     const isMatch = await bcrypt.compare(loginDto.password, user.data.password);
     if (!isMatch) {
+      console.log({ isMatch, loginDto });
       throw new UnauthorizedException();
     }
     const payload = { sub: user.data.id, username: user.data.username };
@@ -26,7 +27,9 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto) {
+  async register(
+    registerDto: RegisterDto,
+  ): Promise<ResponseDto | ErrorResponseDto> {
     if (registerDto.password !== registerDto.confpassword) {
       return new ErrorResponseDto({
         message: 'Passwords do not match.',
@@ -34,14 +37,7 @@ export class AuthService {
         error: 'Bad Request',
       });
     }
-    const salt = bcrypt.genSalt();
-    const hash = await bcrypt.hash(registerDto.password, await salt);
-    const user = {
-      username: registerDto.username,
-      email: registerDto.email,
-      name: registerDto.name,
-      password: hash,
-    };
+    const { confpassword, ...user } = registerDto;
     try {
       const response = await this.userService.create({ ...user });
       return new ResponseDto({ data: response });

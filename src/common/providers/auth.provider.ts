@@ -1,4 +1,4 @@
-import { AuthGuard } from 'src/controllers/auth/auth.guard';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 export const AuthProvider = {
   provide: 'APP_GUARD',

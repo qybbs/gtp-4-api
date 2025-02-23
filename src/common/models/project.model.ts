@@ -5,10 +5,12 @@ import {
   HasMany,
   ForeignKey,
   BelongsTo,
+  BelongsToMany,
 } from 'sequelize-typescript';
 import { Task } from './task.model';
 import { Event } from './event.model';
 import { User } from './user.model';
+import { ProjectCollaborator } from './collaborator.model';
 
 @Table({
   tableName: 'projects',
@@ -32,4 +34,7 @@ export class Project extends Model {
 
   @BelongsTo(() => User)
   user: User;
+
+  @BelongsToMany(() => User, () => ProjectCollaborator)
+  collaborators: User[];
 }
