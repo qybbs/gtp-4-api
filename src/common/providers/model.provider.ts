@@ -1,4 +1,5 @@
 import { Event, Project, Task, User } from '../models';
+import { ProjectCollaborator } from '../models/collaborator.model';
 
 export const userProvider = {
   provide: 'USER_REPOSITORY',
@@ -22,5 +23,5 @@ export const taskProvider = {
 
 export const collaboratorProvider = {
   provide: 'COLLABORATOR_REPOSITORY',
-  useValue: Task,
+  useValue: ProjectCollaborator,
 };

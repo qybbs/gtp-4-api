@@ -1,4 +1,10 @@
-import { Table, Column, Model, ForeignKey } from 'sequelize-typescript';
+import {
+  Table,
+  Column,
+  Model,
+  ForeignKey,
+  BelongsTo,
+} from 'sequelize-typescript';
 import { User } from './user.model';
 import { Project } from './project.model';
 
@@ -13,4 +19,10 @@ export class ProjectCollaborator extends Model {
   @ForeignKey(() => User)
   @Column
   userId: number;
+
+  @BelongsTo(() => Project)
+  project: Project;
+
+  @BelongsTo(() => User)
+  user: User;
 }

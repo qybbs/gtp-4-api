@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
-import { Task } from 'src/common/models';
+import { Project, Task } from 'src/common/models';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -10,14 +10,31 @@ export class TaskService {
     @Inject('TASK_REPOSITORY') private readonly taskModel: typeof Task,
   ) {}
 
-  async getAll(): Promise<ResponseDto<Task[]>> {
-    const tasks = await this.taskModel.findAll();
+  async getAll(req: Request): Promise<ResponseDto<Task[]>> {
+    const userId = req['user'].id;
+    const tasks = await this.taskModel.findAll({
+      include: [
+        {
+          model: Project,
+          attributes: [],
+          where: { userId },
+        },
+      ],
+    });
     return new ResponseDto<Task[]>({ data: tasks });
   }
 
-  async findOne(id: number): Promise<ResponseDto<Task>> {
-    const task = await this.taskModel.findOne({ where: { id } });
-    return new ResponseDto<Task>({ data: task });
+  async findOne(id: number): Promise<ResponseDto<Task> | ErrorResponseDto> {
+    try {
+      const task = await this.taskModel.findOne({ where: { id } });
+      return new ResponseDto<Task>({ data: task });
+    } catch (error) {
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
+    }
   }
 
   async create(CreateTaskDto: CreateTaskDto) {
@@ -30,6 +47,12 @@ export class TaskService {
           message: 'Task with this name already exists.',
           statusCode: 400,
           error: 'Bad Request',
+        });
+      } else {
+        return new ErrorResponseDto({
+          message: 'An error occurred',
+          statusCode: 500,
+          error: 'Internal Server Error',
         });
       }
     }

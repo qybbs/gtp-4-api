@@ -24,7 +24,7 @@ import {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Get all user' })
   @Get()
   @ApiOkResponse({
@@ -34,7 +34,7 @@ export class UserController {
     return this.userService.getAll();
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Get one user' })
   @ApiHeader({
     name: 'Authorization',
@@ -51,7 +51,7 @@ export class UserController {
     return this.userService.findOne(id);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Post resource user' })
   @Post()
   @ApiCreatedResponse({
@@ -63,7 +63,7 @@ export class UserController {
     return this.userService.create(CreateUserDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Update resource user' })
   @Patch(':id')
   @ApiOkResponse({
@@ -78,7 +78,7 @@ export class UserController {
     return this.userService.update(+id, updateUserDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Delete resource user' })
   @Delete(':id')
   @ApiOkResponse({

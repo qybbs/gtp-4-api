@@ -16,7 +16,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 export class EventController {
   constructor(private readonly eventService: EventService) {}
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Get all event' })
   @Get()
   findAll() {
@@ -29,21 +29,21 @@ export class EventController {
     return this.eventService.findOne(id);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Post resource event' })
   @Post()
   create(@Body() CreateEventDto: CreateEventDto) {
     return this.eventService.create(CreateEventDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Update resource event' })
   @Patch(':id')
   update(@Param('id') id: number, @Body() UpdateEventDto: UpdateEventDto) {
     return this.eventService.update(id, UpdateEventDto);
   }
 
-  @ApiBearerAuth()
+  @ApiBearerAuth('Access Token')
   @ApiOperation({ summary: 'Delete resource event' })
   @Delete(':id')
   delete(@Param('id') id: number) {

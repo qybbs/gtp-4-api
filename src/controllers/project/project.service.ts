@@ -1,9 +1,4 @@
-import {
-  ExecutionContext,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
 import { Project } from 'src/common/models';
 import { CreateProjectDto } from './dto/create-user.dto';
@@ -11,7 +6,6 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectCollaborator } from 'src/common/models/collaborator.model';
 import { CollaboratorDto } from './dto/collaborator.dto';
 import { Request } from 'express';
-import { where } from 'sequelize';
 
 @Injectable()
 export class ProjectService {
@@ -42,6 +36,9 @@ export class ProjectService {
   async findOne(id: number): Promise<ResponseDto<Project> | ErrorResponseDto> {
     try {
       const project = await this.projectModel.findOne({ where: { id } });
+      if (!project) {
+        throw new NotFoundException(`Project with id ${id} not found`);
+      }
       return new ResponseDto<Project>({ data: project });
     } catch (error) {
       return new ErrorResponseDto({
@@ -169,6 +166,29 @@ export class ProjectService {
       return new ResponseDto({
         data: `Collaborator with id ${CollaboratorDto.userId} successfully removed from project with id ${CollaboratorDto.projectId}`,
       });
+    } catch (error) {
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
+    }
+  }
+
+  async getCollaboratingProjects(
+    req: Request,
+  ): Promise<ResponseDto<Project[]> | ErrorResponseDto> {
+    try {
+      const userId = req['user'].id;
+      const projects = await this.projectModel.findAll({
+        include: [
+          {
+            model: ProjectCollaborator,
+            where: { userId: userId },
+          },
+        ],
+      });
+      return new ResponseDto<Project[]>({ data: projects });
     } catch (error) {
       return new ErrorResponseDto({
         message: error.message,

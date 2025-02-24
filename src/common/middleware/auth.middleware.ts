@@ -14,7 +14,7 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const token = this.extractTokenFromHeader(req);
     if (!token) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Access token not provided');
     }
     try {
       const payload = await this.jwtService.verifyAsync(token, {
@@ -22,7 +22,7 @@ export class AuthMiddleware implements NestMiddleware {
       });
       req['user'] = payload;
     } catch {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid access token');
     }
     next();
   }

@@ -28,13 +28,13 @@ export class Project extends Model {
   @HasMany(() => Event)
   events: Event[];
 
+  @HasMany(() => ProjectCollaborator)
+  collaborators: ProjectCollaborator[];
+
   @ForeignKey(() => User)
   @Column
   userId: number;
 
   @BelongsTo(() => User)
   user: User;
-
-  @BelongsToMany(() => User, () => ProjectCollaborator)
-  collaborators: User[];
 }
