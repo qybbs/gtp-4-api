@@ -32,6 +32,7 @@ import {
   CreatedResponse,
   DeletedResponse,
   EmptyRequestResponse,
+  GetAllNotFoundResponse,
   GetAllSuccessResponse,
   GetSuccessResponse,
   InvalidTokenResponse,
@@ -55,6 +56,7 @@ export class ProjectController {
   })
   @ApiOkResponse(GetAllSuccessResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
+  @ApiNotFoundResponse(GetAllNotFoundResponse)
   findAll(@Req() req: Request) {
     return this.projectService.getAll(req);
   }

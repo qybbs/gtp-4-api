@@ -86,7 +86,7 @@ export class ProjectGuard implements CanActivate {
     try {
       projectId = await this.checkProjectId(request);
     } catch (error) {
-      throw new BadRequestException('Invalid project ID');
+      throw new NotFoundException('Project not found');
     }
 
     const project = await this.projectService.findOne(projectId);

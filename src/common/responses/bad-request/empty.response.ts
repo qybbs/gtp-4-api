@@ -1,7 +1,7 @@
 import { ApiResponseNoStatusOptions } from '@nestjs/swagger';
 
 export const EmptyRequestResponse: ApiResponseNoStatusOptions = {
-  description: 'body request is incomplete',
+  description: 'Body request is incomplete',
   schema: {
     type: 'object',
     properties: {

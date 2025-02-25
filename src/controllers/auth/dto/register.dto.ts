@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Equals, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsUnique } from 'src/common/decorators/is-unique.decorator';
 import { IsMatch } from 'src/common/validators';
 
 export class RegisterDto {
@@ -18,6 +19,7 @@ export class RegisterDto {
   })
   @IsNotEmpty()
   @IsEmail()
+  @IsUnique('User', 'email')
   email: string;
 
   @ApiProperty({
@@ -26,6 +28,7 @@ export class RegisterDto {
     example: 'johndoe',
   })
   @IsNotEmpty()
+  @IsUnique('User', 'username')
   username: string;
 
   @ApiProperty({

@@ -12,4 +12,5 @@ export * from './unauthorized/wrong-login.response';
 export * from './bad-request/unique-register.response';
 export * from './bad-request/empty.response';
 export * from './not-found/not-found.response';
+export * from './not-found/get-all-not-found.response';
 export * from './forbidden/project-forbidden.response';

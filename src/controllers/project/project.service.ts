@@ -23,6 +23,9 @@ export class ProjectService {
       const projects = await this.projectModel.findAll({
         where: { userId },
       });
+      if (projects.length === 0) {
+        throw new NotFoundException('No projects found');
+      }
       return new ResponseDto<Project[]>({ data: projects });
     } catch (error) {
       return new ErrorResponseDto({

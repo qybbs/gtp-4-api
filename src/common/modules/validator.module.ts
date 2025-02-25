@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { IsExistValidator } from '../validators';
+import { IsExistValidator, IsUniqueValidator } from '../validators';
 import {
   collaboratorProvider,
   eventProvider,
@@ -13,12 +13,13 @@ import {
   controllers: [],
   providers: [
     IsExistValidator,
+    IsUniqueValidator,
     userProvider,
     projectProvider,
     collaboratorProvider,
     taskProvider,
     eventProvider,
   ],
-  exports: [IsExistValidator],
+  exports: [IsExistValidator, IsUniqueValidator],
 })
 export class ValidatorModule {}

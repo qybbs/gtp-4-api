@@ -6,9 +6,9 @@ import {
 } from 'class-validator';
 import { Event, Project, ProjectCollaborator, Task, User } from '../models';
 
-@ValidatorConstraint({ name: 'IsExist', async: true })
+@ValidatorConstraint({ name: 'IsUnique', async: true })
 @Injectable()
-export class IsExistValidator implements ValidatorConstraintInterface {
+export class IsUniqueValidator implements ValidatorConstraintInterface {
   constructor(
     @Inject('USER_REPOSITORY') private readonly userModel: typeof User,
     @Inject('PROJECT_REPOSITORY') private readonly projectModel: typeof Project,
@@ -22,7 +22,9 @@ export class IsExistValidator implements ValidatorConstraintInterface {
     const [modelName, columnName] = args.constraints;
     let result;
     if (modelName === 'User') {
-      result = await this.userModel.findOne({ where: { [columnName]: value } });
+      result = await this.userModel.findOne({
+        where: { [columnName]: value },
+      });
     } else if (modelName === 'Project') {
       result = await this.projectModel.findOne({
         where: { [columnName]: value },
@@ -40,11 +42,11 @@ export class IsExistValidator implements ValidatorConstraintInterface {
         where: { [columnName]: value },
       });
     }
-    return !!result;
+    return !result;
   }
 
   defaultMessage(args: ValidationArguments) {
     const [modelName, columnName] = args.constraints;
-    return `${columnName} does not exist in ${modelName} data`;
+    return `${columnName} already exist in ${modelName} data`;
   }
 }

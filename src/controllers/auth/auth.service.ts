@@ -32,17 +32,7 @@ export class AuthService {
     registerDto: RegisterDto,
   ): Promise<ResponseDto | ErrorResponseDto> {
     const { confpassword, ...user } = registerDto;
-    try {
-      const response = await this.userService.create({ ...user });
-      return new ResponseDto({ data: response });
-    } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'User with this email or username already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      }
-    }
+    const response = await this.userService.create({ ...user });
+    return new ResponseDto({ data: response });
   }
 }
