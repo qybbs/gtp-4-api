@@ -44,7 +44,7 @@ export class ProjectGuard implements CanActivate {
         if (task instanceof ErrorResponseDto) {
           throw new NotFoundException(task.message);
         } else if (!task.data) {
-          throw new NotFoundException(`Task ${taskId} not found`);
+          throw new NotFoundException(`Task with id ${taskId} is not found`);
         }
       }
       projectId =

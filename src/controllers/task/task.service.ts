@@ -76,11 +76,12 @@ export class TaskService {
 
   async delete(id: number): Promise<ResponseDto> {
     const response = await this.taskModel.destroy({ where: { id } });
-    if (response === 0) {
-      throw new NotFoundException(`Task with id ${id} not found`);
-    }
     return new ResponseDto({
-      data: `Task with id ${id} successfully deleted`,
+      data: {
+        message: `Task with id ${id} successfully deleted`,
+        deletedFields: response,
+        statusCode: 200,
+      },
     });
   }
 }

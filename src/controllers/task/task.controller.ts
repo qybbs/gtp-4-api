@@ -22,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CreatedResponse,
+  DeletedResponse,
   EmptyRequestResponse,
   GetAllSuccessResponse,
   InvalidTokenResponse,
@@ -97,7 +98,14 @@ export class TaskController {
   }
 
   @ApiBearerAuth('Access Token')
-  @ApiOperation({ summary: 'Delete resource task' })
+  @ApiOperation({
+    summary: 'Delete resource task',
+    description: 'Delete a task by task ID',
+  })
+  @ApiOkResponse(DeletedResponse)
+  @ApiUnauthorizedResponse(InvalidTokenResponse)
+  @ApiForbiddenResponse(ProjectForbiddenResponse)
+  @ApiNotFoundResponse(NotFoundResponse)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.taskService.delete(id);
