@@ -9,9 +9,11 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ProjectService } from 'src/controllers/project/project.service';
 import { UNGUARD_KEY } from '../decorators';
-import { ErrorResponseDto } from '../dto';
+import { ErrorResponseDto, ResponseDto } from '../dto';
 import { TaskService } from 'src/controllers/task/task.service';
 import { EventService } from 'src/controllers/event/event.service';
+import { Request } from 'express';
+import { Event, Project, Task } from '../models';
 
 @Injectable()
 export class ProjectGuard implements CanActivate {
@@ -22,33 +24,50 @@ export class ProjectGuard implements CanActivate {
     private readonly eventService: EventService,
   ) {}
 
-  async checkTaskEventAccess(req: any): Promise<number | ErrorResponseDto> {
+  async checkProjectId(req: Request): Promise<number> {
     const path = req.route.path;
-    try {
-      if (req.params.id) {
-        if (path.includes('task')) {
-          const project = await this.taskService.findOne(req.params.id);
-          if (project instanceof ErrorResponseDto) {
-            throw new NotFoundException(project.message);
-          } else {
-            return project.data.projectId;
-          }
-        } else if (path.includes('event')) {
-          const project = await this.eventService.findOne(req.params.id);
-          if (project instanceof ErrorResponseDto) {
-            throw new NotFoundException(project.message);
-          } else {
-            return project.data.projectId;
-          }
-        }
-      } else {
-        throw new BadRequestException('ID is required');
-      }
-    } catch (error) {
-      throw new ErrorResponseDto({
-        message: error.message,
-      });
+    if (!req.params.id) {
+      throw new BadRequestException('ID is required');
     }
+
+    let projectId: number;
+    let project: ResponseDto<Project> | ErrorResponseDto;
+    if (path.includes('project')) {
+      projectId = parseInt(req.params.id ? req.params.id : req.body.projectId);
+      project = await this.projectService.findOne(projectId);
+    } else if (path.includes('task')) {
+      let task: ResponseDto<Task> | ErrorResponseDto;
+      if (req.params.id) {
+        const taskId = parseInt(req.params.id);
+        task = await this.taskService.findOne(taskId);
+        if (task instanceof ErrorResponseDto) {
+          throw new NotFoundException(task.message);
+        }
+      }
+      projectId = task.data?.projectId
+        ? task.data.projectId
+        : req.body.projectId;
+      project = await this.projectService.findOne(projectId);
+    } else if (path.includes('event')) {
+      let event: ResponseDto<Event> | ErrorResponseDto;
+      if (req.params.id) {
+        const eventId = parseInt(req.params.id);
+        event = await this.eventService.findOne(eventId);
+        if (event instanceof ErrorResponseDto) {
+          throw new NotFoundException(event.message);
+        }
+      }
+      projectId = event.data?.projectId
+        ? event.data.projectId
+        : req.body.projectId;
+      project = await this.projectService.findOne(projectId);
+    }
+
+    if (project instanceof ErrorResponseDto) {
+      throw new NotFoundException(project.message);
+    }
+
+    return project.data.id;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -61,33 +80,28 @@ export class ProjectGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const path = request.route.path;
     const user = request.user;
 
-    console.log(path);
-
-    const projectId = parseInt(
-      request.params.id
-        ? request.params.id
-        : request.body.projectId
-          ? request.body.projectId
-          : this.checkTaskEventAccess(request),
-    );
+    let projectId: number;
+    try {
+      projectId = await this.checkProjectId(request);
+    } catch (error) {
+      throw new BadRequestException('Invalid project ID');
+    }
 
     const project = await this.projectService.findOne(projectId);
-    const collaborator = await this.projectService.getCollaborators(projectId);
-
     if (project instanceof ErrorResponseDto) {
       throw new NotFoundException(project.message);
-    } else {
-      const isOwner = project.data.userId === user.id;
-      const isCollaborator = collaborator.data.some(
-        (c) => c.userId === user.id,
-      );
+    }
 
-      if (!isOwner && !isCollaborator) {
-        throw new ForbiddenException('Access to this project is forbidden');
-      }
+    const collaborator = await this.projectService.getCollaborators(projectId);
+    const isOwner = project.data.userId === user.id;
+    const isCollaborator = collaborator.data.some(
+      (c: { userId: number }) => c.userId === user.id,
+    );
+
+    if (!isOwner && !isCollaborator) {
+      throw new ForbiddenException('Access to this project is forbidden');
     }
 
     return true;

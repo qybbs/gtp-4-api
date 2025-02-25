@@ -6,7 +6,6 @@ import {
   Param,
   Patch,
   Post,
-  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -40,6 +39,7 @@ import {
   ProjectForbiddenResponse,
   UpdatedResponse,
 } from 'src/common/responses';
+import { CollaboratorDto } from './dto/collaborator.dto';
 
 @UseGuards(ProjectGuard)
 @Controller('project')
@@ -133,7 +133,7 @@ export class ProjectController {
     return this.projectService.delete(id);
   }
 
-  @Get('/collaborators/:projectId')
+  @Get('/collaborators/:id')
   @ApiBearerAuth('Access Token')
   @ApiOperation({
     summary: 'Get project collaborators',
@@ -143,7 +143,7 @@ export class ProjectController {
   @ApiNotFoundResponse(NotFoundResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
-  getCollaborators(@Param('projectId') projectId: number) {
+  getCollaborators(@Param('id') projectId: number) {
     return this.projectService.getCollaborators(projectId);
   }
 
@@ -157,11 +157,8 @@ export class ProjectController {
   @ApiBadRequestResponse(EmptyRequestResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
-  inviteCollaborator(
-    @Query('userId') userId: number,
-    @Query('projectId') projectId: number,
-  ) {
-    return this.projectService.addCollaborator({ userId, projectId });
+  inviteCollaborator(@Body() collaboratorDto: CollaboratorDto) {
+    return this.projectService.addCollaborator(collaboratorDto);
   }
 
   @Delete('/collaborator')
@@ -174,10 +171,7 @@ export class ProjectController {
   @ApiBadRequestResponse(EmptyRequestResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
-  removeCollaborator(
-    @Query('userId') userId: number,
-    @Query('projectId') projectId: number,
-  ) {
-    return this.projectService.removeCollaborator({ userId, projectId });
+  removeCollaborator(@Body() collaboratorDto: CollaboratorDto) {
+    return this.projectService.removeCollaborator(collaboratorDto);
   }
 }

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Equals, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsMatch } from 'src/common/validators';
 
 export class RegisterDto {
   @ApiProperty({
@@ -41,5 +42,6 @@ export class RegisterDto {
     example: 'password',
   })
   @IsNotEmpty()
+  @IsMatch('password')
   confpassword: string;
 }

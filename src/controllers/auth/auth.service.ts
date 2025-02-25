@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { UnauthorizedException } from '@nestjs/common';
@@ -14,12 +14,13 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async login(loginDto: LoginDto): Promise<{ access_token: string }> {
+  async login(
+    loginDto: LoginDto,
+  ): Promise<{ access_token: string } | ErrorResponseDto> {
     const user = await this.userService.findOneByUsername(loginDto.username);
     const isMatch = await bcrypt.compare(loginDto.password, user.data.password);
     if (!isMatch) {
-      console.log({ isMatch, loginDto });
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('Invalid credentials');
     }
     const payload = { id: user.data.id, username: user.data.username };
     return {
@@ -30,13 +31,6 @@ export class AuthService {
   async register(
     registerDto: RegisterDto,
   ): Promise<ResponseDto | ErrorResponseDto> {
-    if (registerDto.password !== registerDto.confpassword) {
-      return new ErrorResponseDto({
-        message: 'Passwords do not match.',
-        statusCode: 400,
-        error: 'Bad Request',
-      });
-    }
     const { confpassword, ...user } = registerDto;
     try {
       const response = await this.userService.create({ ...user });

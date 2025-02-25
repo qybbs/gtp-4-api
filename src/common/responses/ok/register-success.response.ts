@@ -11,7 +11,7 @@ export const RegisterSuccessResponse: ApiResponseNoStatusOptions = {
       username: { type: 'string', example: 'johndoe' },
       password: {
         type: 'string',
-        example: '$2b$10$AhZgulhCK1hSuZha50obAutoY11EZmrpU5JNtr/A2ZPQyqQktw8IK',
+        example: '$2b$10$AhZgulhC***********/A2ZPQyqQktw8IK',
       },
       updatedAt: {
         type: 'string',
