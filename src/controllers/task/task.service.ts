@@ -21,6 +21,9 @@ export class TaskService {
         },
       ],
     });
+    if (tasks.length === 0) {
+      throw new NotFoundException('No tasks found');
+    }
     return new ResponseDto<Task[]>({ data: tasks });
   }
 
@@ -42,19 +45,11 @@ export class TaskService {
       const response = await this.taskModel.create({ ...CreateTaskDto });
       return new ResponseDto({ data: response });
     } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'Task with this name already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      } else {
-        return new ErrorResponseDto({
-          message: 'An error occurred',
-          statusCode: 500,
-          error: 'Internal Server Error',
-        });
-      }
+      return new ErrorResponseDto({
+        message: 'An error occurred',
+        statusCode: 500,
+        error: 'Internal Server Error',
+      });
     }
   }
 
@@ -71,13 +66,11 @@ export class TaskService {
         data: `Task with id ${id} successfully updated`,
       });
     } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'Task with this name already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      }
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: 400,
+        error: error.name || 'Bad Request',
+      });
     }
   }
 

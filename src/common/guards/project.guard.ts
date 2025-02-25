@@ -13,7 +13,7 @@ import { ErrorResponseDto, ResponseDto } from '../dto';
 import { TaskService } from 'src/controllers/task/task.service';
 import { EventService } from 'src/controllers/event/event.service';
 import { Request } from 'express';
-import { Event, Project, Task } from '../models';
+import { Event, Task } from '../models';
 
 @Injectable()
 export class ProjectGuard implements CanActivate {
@@ -26,15 +26,16 @@ export class ProjectGuard implements CanActivate {
 
   async checkProjectId(req: Request): Promise<number> {
     const path = req.route.path;
-    if (!req.params.id) {
-      throw new BadRequestException('ID is required');
-    }
-
     let projectId: number;
-    let project: ResponseDto<Project> | ErrorResponseDto;
     if (path.includes('project')) {
-      projectId = parseInt(req.params.id ? req.params.id : req.body.projectId);
-      project = await this.projectService.findOne(projectId);
+      projectId = req.params.id
+        ? req.params.id
+        : req.body.projectId
+          ? req.body.projectId
+          : null;
+      if (!projectId) {
+        throw new BadRequestException('Project ID is required');
+      }
     } else if (path.includes('task')) {
       let task: ResponseDto<Task> | ErrorResponseDto;
       if (req.params.id) {
@@ -42,12 +43,20 @@ export class ProjectGuard implements CanActivate {
         task = await this.taskService.findOne(taskId);
         if (task instanceof ErrorResponseDto) {
           throw new NotFoundException(task.message);
+        } else if (!task.data) {
+          throw new NotFoundException(`Task ${taskId} not found`);
         }
       }
-      projectId = task.data?.projectId
-        ? task.data.projectId
-        : req.body.projectId;
-      project = await this.projectService.findOne(projectId);
+      projectId =
+        task && task.data?.projectId
+          ? task.data.projectId
+          : req.body.projectId
+            ? req.body.projectId
+            : null;
+      if (!projectId) {
+        console.log(task);
+        throw new BadRequestException('Project ID is required');
+      }
     } else if (path.includes('event')) {
       let event: ResponseDto<Event> | ErrorResponseDto;
       if (req.params.id) {
@@ -57,11 +66,18 @@ export class ProjectGuard implements CanActivate {
           throw new NotFoundException(event.message);
         }
       }
-      projectId = event.data?.projectId
-        ? event.data.projectId
-        : req.body.projectId;
-      project = await this.projectService.findOne(projectId);
+      projectId =
+        event && event.data?.projectId
+          ? event.data.projectId
+          : req.body.projectId
+            ? req.body.projectId
+            : null;
+      if (!projectId) {
+        throw new BadRequestException('Project ID is required');
+      }
     }
+
+    const project = await this.projectService.findOne(projectId);
 
     if (project instanceof ErrorResponseDto) {
       throw new NotFoundException(project.message);
@@ -86,7 +102,7 @@ export class ProjectGuard implements CanActivate {
     try {
       projectId = await this.checkProjectId(request);
     } catch (error) {
-      throw new NotFoundException('Project not found');
+      throw new NotFoundException(error.response);
     }
 
     const project = await this.projectService.findOne(projectId);

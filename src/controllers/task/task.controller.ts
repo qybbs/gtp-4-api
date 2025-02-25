@@ -27,6 +27,7 @@ import {
   InvalidTokenResponse,
   NotFoundResponse,
   ProjectForbiddenResponse,
+  UpdatedResponse,
 } from 'src/common/responses';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -47,6 +48,7 @@ export class TaskController {
   })
   @ApiOkResponse(GetAllSuccessResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
+  @ApiNotFoundResponse(NotFoundResponse)
   findAll(@Req() req: Request) {
     return this.taskService.getAll(req);
   }
@@ -80,9 +82,16 @@ export class TaskController {
     return this.taskService.create(CreateTaskDto);
   }
 
-  @ApiBearerAuth('Access Token')
-  @ApiOperation({ summary: 'Update resource task' })
   @Patch(':id')
+  @ApiBearerAuth('Access Token')
+  @ApiOperation({
+    summary: 'Update resource task',
+    description: 'Update a task by task ID',
+  })
+  @ApiOkResponse(UpdatedResponse)
+  @ApiUnauthorizedResponse(InvalidTokenResponse)
+  @ApiForbiddenResponse(ProjectForbiddenResponse)
+  @ApiNotFoundResponse(NotFoundResponse)
   update(@Param('id') id: number, @Body() UpdateTaskDto: UpdateTaskDto) {
     return this.taskService.update(id, UpdateTaskDto);
   }

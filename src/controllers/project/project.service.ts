@@ -76,28 +76,26 @@ export class ProjectService {
 
   async update(
     id: number,
-    UpdateProjectDto: UpdateProjectDto,
+    updateProjectDto: UpdateProjectDto,
   ): Promise<ResponseDto | ErrorResponseDto> {
-    try {
-      const response = await this.projectModel.update(
-        { ...UpdateProjectDto },
-        { where: { id } },
-      );
-      if (response[0] === 0) {
-        throw new NotFoundException(`Project with id ${id} not found`);
-      }
-      return new ResponseDto({
-        data: `Project with id ${id} successfully updated`,
+    if (Object.keys(updateProjectDto).length === 0) {
+      return new ErrorResponseDto({
+        message: 'No fields to update',
+        statusCode: 400,
+        error: 'Bad Request',
       });
-    } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'Project with this name already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      }
     }
+    const response = await this.projectModel.update(
+      { ...updateProjectDto },
+      { where: { id } },
+    );
+    return new ResponseDto({
+      data: {
+        message: `Project with id ${id} successfully updated`,
+        updatedFields: response[0],
+        statusCode: 200,
+      },
+    });
   }
 
   async delete(id: number): Promise<ResponseDto | ErrorResponseDto> {

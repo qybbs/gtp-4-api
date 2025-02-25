@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsExist } from 'src/common/decorators';
 
 export class CreateTaskDto {
   @ApiProperty({
@@ -31,6 +32,7 @@ export class CreateTaskDto {
 
   @IsNumber()
   @IsNotEmpty()
+  @IsExist('Project', 'id')
   @ApiProperty({
     type: Number,
     description: 'Id of the task project',
