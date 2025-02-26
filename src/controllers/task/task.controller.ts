@@ -25,6 +25,7 @@ import {
   DeletedResponse,
   EmptyRequestResponse,
   GetAllSuccessResponse,
+  GetSuccessResponse,
   InvalidTokenResponse,
   NotFoundResponse,
   ProjectForbiddenResponse,
@@ -54,16 +55,16 @@ export class TaskController {
     return this.taskService.getAll(req);
   }
 
+  @Get(':id')
   @ApiBearerAuth('Access Token')
   @ApiOperation({
     summary: 'Get one task',
     description: 'Retrieve a task by ID',
   })
-  @ApiOkResponse(GetAllSuccessResponse)
+  @ApiOkResponse(GetSuccessResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
-  @Get(':id')
   findOne(@Param('id') id: number) {
     return this.taskService.findOne(id);
   }
@@ -97,6 +98,7 @@ export class TaskController {
     return this.taskService.update(id, UpdateTaskDto);
   }
 
+  @Delete(':id')
   @ApiBearerAuth('Access Token')
   @ApiOperation({
     summary: 'Delete resource task',
@@ -106,7 +108,6 @@ export class TaskController {
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
-  @Delete(':id')
   delete(@Param('id') id: number) {
     return this.taskService.delete(id);
   }

@@ -64,13 +64,11 @@ export class ProjectService {
       });
       return new ResponseDto({ data: response });
     } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'Project with this name already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      }
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
     }
   }
 

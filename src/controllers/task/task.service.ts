@@ -54,16 +54,23 @@ export class TaskService {
   }
 
   async update(id: number, UpdateTaskDto: UpdateTaskDto) {
+    if (Object.keys(UpdateTaskDto).length === 0) {
+      return new ErrorResponseDto({
+        message: 'No fields to update',
+        statusCode: 400,
+        error: 'Bad Request',
+      });
+    }
     try {
       const response = await this.taskModel.update(
         { ...UpdateTaskDto },
         { where: { id } },
       );
-      if (response[0] === 0) {
-        throw new NotFoundException(`Task with id ${id} not found`);
-      }
       return new ResponseDto({
-        data: `Task with id ${id} successfully updated`,
+        data: {
+          message: `Task with id ${id} successfully updated`,
+          updated: response[0],
+        },
       });
     } catch (error) {
       return new ErrorResponseDto({

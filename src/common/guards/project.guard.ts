@@ -64,6 +64,8 @@ export class ProjectGuard implements CanActivate {
         event = await this.eventService.findOne(eventId);
         if (event instanceof ErrorResponseDto) {
           throw new NotFoundException(event.message);
+        } else if (!event.data) {
+          throw new NotFoundException(`Event with id ${eventId} is not found`);
         }
       }
       projectId =
