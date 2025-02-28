@@ -22,6 +22,11 @@ export class ProjectService {
       const userId = req['user'].id;
       const projects = await this.projectModel.findAll({
         where: { userId },
+        include: [
+          {
+            model: ProjectCollaborator,
+          },
+        ],
       });
       if (projects.length === 0) {
         throw new NotFoundException('No projects found');
@@ -132,11 +137,19 @@ export class ProjectService {
   }
 
   async addCollaborator(
-    CollaboratorDto: CollaboratorDto,
+    collaboratorDto: CollaboratorDto,
+    req: Request,
   ): Promise<ResponseDto | ErrorResponseDto> {
+    if (collaboratorDto.userId === req['user'].id) {
+      return new ErrorResponseDto({
+        message: 'You cannot add yourself as a collaborator',
+        statusCode: 400,
+        error: 'Bad Request',
+      });
+    }
     try {
       const response = await this.collaboratorModel.create({
-        CollaboratorDto,
+        ...collaboratorDto,
       });
       return new ResponseDto({
         data: response,
@@ -151,19 +164,19 @@ export class ProjectService {
   }
 
   async removeCollaborator(
-    CollaboratorDto: CollaboratorDto,
+    collaboratorDto: CollaboratorDto,
   ): Promise<ResponseDto | ErrorResponseDto> {
     try {
       const response = await this.collaboratorModel.destroy({
-        where: { CollaboratorDto },
+        where: { ...collaboratorDto },
       });
       if (response === 0) {
         throw new NotFoundException(
-          `Collaborator with id ${CollaboratorDto.userId} not found in project with id ${CollaboratorDto.projectId}`,
+          `Collaborator with id ${collaboratorDto.userId} not found in project with id ${collaboratorDto.projectId}`,
         );
       }
       return new ResponseDto({
-        data: `Collaborator with id ${CollaboratorDto.userId} successfully removed from project with id ${CollaboratorDto.projectId}`,
+        data: `Collaborator with id ${collaboratorDto.userId} successfully removed from project with id ${collaboratorDto.projectId}`,
       });
     } catch (error) {
       return new ErrorResponseDto({

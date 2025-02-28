@@ -159,8 +159,11 @@ export class ProjectController {
   @ApiBadRequestResponse(EmptyRequestResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
-  inviteCollaborator(@Body() collaboratorDto: CollaboratorDto) {
-    return this.projectService.addCollaborator(collaboratorDto);
+  inviteCollaborator(
+    @Body() collaboratorDto: CollaboratorDto,
+    @Req() req: Request,
+  ) {
+    return this.projectService.addCollaborator(collaboratorDto, req);
   }
 
   @Delete('/collaborator')
