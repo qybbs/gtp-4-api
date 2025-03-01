@@ -14,6 +14,7 @@ import { TaskService } from 'src/controllers/task/task.service';
 import { EventService } from 'src/controllers/event/event.service';
 import { Request } from 'express';
 import { Event, Task } from '../models';
+import { console } from 'inspector';
 
 @Injectable()
 export class ProjectGuard implements CanActivate {
@@ -74,6 +75,13 @@ export class ProjectGuard implements CanActivate {
           : req.body.projectId
             ? req.body.projectId
             : null;
+      if (!projectId) {
+        throw new BadRequestException('Project ID is required');
+      }
+    } else {
+      projectId = req.query.projectId
+        ? req.query.projectId
+        : req.body.projectId;
       if (!projectId) {
         throw new BadRequestException('Project ID is required');
       }

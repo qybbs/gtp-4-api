@@ -52,7 +52,7 @@ export class EventController {
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
   findAll(@Req() req: Request) {
-    return this.eventService.getAll(req);
+    return this.eventService.getAllByProject(req);
   }
 
   @Get(':id')

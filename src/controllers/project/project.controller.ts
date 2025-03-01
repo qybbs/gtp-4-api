@@ -27,8 +27,6 @@ import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectGuard } from 'src/common/guards';
 import { Unguard } from 'src/common/decorators';
 import {
-  CollabAddedResponse,
-  CollabRemovedResponse,
   CreatedResponse,
   DeletedResponse,
   EmptyRequestResponse,
@@ -40,7 +38,6 @@ import {
   ProjectForbiddenResponse,
   UpdatedResponse,
 } from 'src/common/responses';
-import { CollaboratorDto } from './dto/collaborator.dto';
 
 @UseGuards(ProjectGuard)
 @Controller('project')
@@ -59,20 +56,6 @@ export class ProjectController {
   @ApiNotFoundResponse(GetAllNotFoundResponse)
   findAll(@Req() req: Request) {
     return this.projectService.getAll(req);
-  }
-
-  @Unguard()
-  @Get('/collaborating')
-  @ApiBearerAuth('Access Token')
-  @ApiOperation({
-    summary: 'Get Collab Projects',
-    description:
-      'Retrieve all projects that the logged-in user is collaborating on',
-  })
-  @ApiOkResponse(GetAllSuccessResponse)
-  @ApiUnauthorizedResponse(InvalidTokenResponse)
-  getCollaboratingProjects(@Req() req: Request) {
-    return this.projectService.getCollaboratingProjects(req);
   }
 
   @Get(':id')
@@ -133,50 +116,5 @@ export class ProjectController {
   @ApiForbiddenResponse(ProjectForbiddenResponse)
   delete(@Param('id') id: number) {
     return this.projectService.delete(id);
-  }
-
-  @Get('/collaborators/:id')
-  @ApiBearerAuth('Access Token')
-  @ApiOperation({
-    summary: 'Get project collaborators',
-    description: 'Get all collaborators in a project by projectId',
-  })
-  @ApiOkResponse(GetAllSuccessResponse)
-  @ApiNotFoundResponse(NotFoundResponse)
-  @ApiUnauthorizedResponse(InvalidTokenResponse)
-  @ApiForbiddenResponse(ProjectForbiddenResponse)
-  getCollaborators(@Param('id') projectId: number) {
-    return this.projectService.getCollaborators(projectId);
-  }
-
-  @Post('/collaborator')
-  @ApiBearerAuth('Access Token')
-  @ApiOperation({
-    summary: 'Invite project collaborator',
-    description: 'Invite a user to collaborate on a project',
-  })
-  @ApiOkResponse(CollabAddedResponse)
-  @ApiBadRequestResponse(EmptyRequestResponse)
-  @ApiUnauthorizedResponse(InvalidTokenResponse)
-  @ApiForbiddenResponse(ProjectForbiddenResponse)
-  inviteCollaborator(
-    @Body() collaboratorDto: CollaboratorDto,
-    @Req() req: Request,
-  ) {
-    return this.projectService.addCollaborator(collaboratorDto, req);
-  }
-
-  @Delete('/collaborator')
-  @ApiBearerAuth('Access Token')
-  @ApiOperation({
-    summary: 'Remove project collaborator',
-    description: 'Remove a user from a project',
-  })
-  @ApiOkResponse(CollabRemovedResponse)
-  @ApiBadRequestResponse(EmptyRequestResponse)
-  @ApiUnauthorizedResponse(InvalidTokenResponse)
-  @ApiForbiddenResponse(ProjectForbiddenResponse)
-  removeCollaborator(@Body() collaboratorDto: CollaboratorDto) {
-    return this.projectService.removeCollaborator(collaboratorDto);
   }
 }

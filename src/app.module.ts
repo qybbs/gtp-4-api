@@ -7,6 +7,7 @@ import { AuthModule } from './controllers/auth/auth.module';
 import { ProjectModule } from './controllers/project/project.module';
 import { TaskModule } from './controllers/task/task.module';
 import { EventModule } from './controllers/event/event.module';
+import { CollaboratorModule } from './controllers/collaborator/collaborator.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { EventModule } from './controllers/event/event.module';
     TaskModule,
     EventModule,
     ValidatorModule,
+    CollaboratorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

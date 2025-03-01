@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
-import { Project, Task } from 'src/common/models';
+import { Project, ProjectCollaborator, Task } from 'src/common/models';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 
@@ -8,23 +8,49 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 export class TaskService {
   constructor(
     @Inject('TASK_REPOSITORY') private readonly taskModel: typeof Task,
+    @Inject('PROJECT_REPOSITORY') private readonly projectModel: typeof Project,
   ) {}
 
-  async getAll(req: Request): Promise<ResponseDto<Task[]>> {
-    const userId = req['user'].id;
-    const tasks = await this.taskModel.findAll({
-      include: [
-        {
-          model: Project,
-          attributes: [],
-          where: { userId },
-        },
-      ],
-    });
-    if (tasks.length === 0) {
-      throw new NotFoundException('No tasks found');
+  async getAllByProject(req: Request): Promise<ResponseDto | ErrorResponseDto> {
+    try {
+      const userId = req['user'].id;
+      const ownedTasks = await this.projectModel.findAll({
+        where: { userId },
+        attributes: ['id', 'name'],
+        include: [
+          {
+            model: Task,
+          },
+        ],
+      });
+      const collabTasks = await this.projectModel.findAll({
+        attributes: ['id', 'name'],
+        include: [
+          {
+            model: ProjectCollaborator,
+            where: { userId: userId },
+            attributes: [],
+          },
+          {
+            model: Task,
+          },
+        ],
+      });
+      const tasks = {
+        ownedTasks: ownedTasks,
+        collabTasks: collabTasks,
+      };
+      if (ownedTasks.length === 0 && collabTasks.length === 0) {
+        throw new NotFoundException('No tasks found');
+      }
+      return new ResponseDto({ data: tasks });
+    } catch (error) {
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
     }
-    return new ResponseDto<Task[]>({ data: tasks });
   }
 
   async findOne(id: number): Promise<ResponseDto<Task> | ErrorResponseDto> {

@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
-import { Event, Project } from 'src/common/models';
+import { Event, ProjectCollaborator } from 'src/common/models';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 
@@ -8,23 +8,49 @@ import { UpdateEventDto } from './dto/update-event.dto';
 export class EventService {
   constructor(
     @Inject('EVENT_REPOSITORY') private readonly eventModel: typeof Event,
+    @Inject('PROJECT_REPOSITORY') private readonly projectModel,
   ) {}
 
-  async getAll(req: Request): Promise<ResponseDto<Event[]>> {
-    const userId = req['user'].id;
-    const events = await this.eventModel.findAll({
-      include: [
-        {
-          model: Project,
-          attributes: [],
-          where: { userId },
-        },
-      ],
-    });
-    if (events.length === 0) {
-      throw new NotFoundException('No events found');
+  async getAllByProject(req: Request): Promise<ResponseDto | ErrorResponseDto> {
+    try {
+      const userId = req['user'].id;
+      const ownedEvents = await this.projectModel.findAll({
+        where: { userId },
+        attributes: ['id', 'name'],
+        include: [
+          {
+            model: Event,
+          },
+        ],
+      });
+      const collabEvents = await this.projectModel.findAll({
+        attributes: ['id', 'name'],
+        include: [
+          {
+            model: ProjectCollaborator,
+            where: { userId: userId },
+            attributes: [],
+          },
+          {
+            model: Event,
+          },
+        ],
+      });
+      const events = {
+        ownedEvents: ownedEvents,
+        collabEvents: collabEvents,
+      };
+      if (ownedEvents.length === 0 && collabEvents.length === 0) {
+        throw new NotFoundException('No tasks found');
+      }
+      return new ResponseDto({ data: events });
+    } catch (error) {
+      return new ErrorResponseDto({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
+      });
     }
-    return new ResponseDto<Event[]>({ data: events });
   }
 
   async findOne(id: number): Promise<ResponseDto<Event> | ErrorResponseDto> {

@@ -4,7 +4,6 @@ import { Project } from 'src/common/models';
 import { CreateProjectDto } from './dto/create-user.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectCollaborator } from 'src/common/models/collaborator.model';
-import { CollaboratorDto } from './dto/collaborator.dto';
 import { Request } from 'express';
 
 @Injectable()
@@ -15,23 +14,35 @@ export class ProjectService {
     private readonly collaboratorModel: typeof ProjectCollaborator,
   ) {}
 
-  async getAll(
-    req: Request,
-  ): Promise<ResponseDto<Project[]> | ErrorResponseDto> {
+  async getAll(req: Request): Promise<ResponseDto | ErrorResponseDto> {
     try {
       const userId = req['user'].id;
-      const projects = await this.projectModel.findAll({
+      const ownedProjects = await this.projectModel.findAll({
         where: { userId },
         include: [
           {
             model: ProjectCollaborator,
+            attributes: ['userId'],
           },
         ],
       });
-      if (projects.length === 0) {
+      const collabProjects = await this.projectModel.findAll({
+        include: [
+          {
+            model: ProjectCollaborator,
+            where: { userId: userId },
+            attributes: ['userId'],
+          },
+        ],
+      });
+      const projects = {
+        ownedProjects: ownedProjects,
+        collabProjects: collabProjects,
+      };
+      if (ownedProjects.length === 0 && collabProjects.length === 0) {
         throw new NotFoundException('No projects found');
       }
-      return new ResponseDto<Project[]>({ data: projects });
+      return new ResponseDto({ data: projects });
     } catch (error) {
       return new ErrorResponseDto({
         message: error.message,
@@ -43,7 +54,10 @@ export class ProjectService {
 
   async findOne(id: number): Promise<ResponseDto<Project> | ErrorResponseDto> {
     try {
-      const project = await this.projectModel.findOne({ where: { id } });
+      const project = await this.projectModel.findOne({
+        where: { id },
+        include: [{ model: ProjectCollaborator, attributes: ['userId'] }],
+      });
       if (!project) {
         throw new NotFoundException(`Project with id ${id} not found`);
       }
@@ -127,80 +141,6 @@ export class ProjectService {
         where: { projectId },
       });
       return new ResponseDto<ProjectCollaborator[]>({ data: collaborators });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
-    }
-  }
-
-  async addCollaborator(
-    collaboratorDto: CollaboratorDto,
-    req: Request,
-  ): Promise<ResponseDto | ErrorResponseDto> {
-    if (collaboratorDto.userId === req['user'].id) {
-      return new ErrorResponseDto({
-        message: 'You cannot add yourself as a collaborator',
-        statusCode: 400,
-        error: 'Bad Request',
-      });
-    }
-    try {
-      const response = await this.collaboratorModel.create({
-        ...collaboratorDto,
-      });
-      return new ResponseDto({
-        data: response,
-      });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
-    }
-  }
-
-  async removeCollaborator(
-    collaboratorDto: CollaboratorDto,
-  ): Promise<ResponseDto | ErrorResponseDto> {
-    try {
-      const response = await this.collaboratorModel.destroy({
-        where: { ...collaboratorDto },
-      });
-      if (response === 0) {
-        throw new NotFoundException(
-          `Collaborator with id ${collaboratorDto.userId} not found in project with id ${collaboratorDto.projectId}`,
-        );
-      }
-      return new ResponseDto({
-        data: `Collaborator with id ${collaboratorDto.userId} successfully removed from project with id ${collaboratorDto.projectId}`,
-      });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
-    }
-  }
-
-  async getCollaboratingProjects(
-    req: Request,
-  ): Promise<ResponseDto<Project[]> | ErrorResponseDto> {
-    try {
-      const userId = req['user'].id;
-      const projects = await this.projectModel.findAll({
-        include: [
-          {
-            model: ProjectCollaborator,
-            where: { userId: userId },
-          },
-        ],
-      });
-      return new ResponseDto<Project[]>({ data: projects });
     } catch (error) {
       return new ErrorResponseDto({
         message: error.message,

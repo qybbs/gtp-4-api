@@ -9,6 +9,7 @@ import {
 } from 'src/common/providers';
 import { TaskService } from '../task/task.service';
 import { EventService } from '../event/event.service';
+import { CollaboratorService } from '../collaborator/collaborator.service';
 
 @Module({
   imports: [],

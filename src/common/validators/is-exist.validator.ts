@@ -1,4 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -18,26 +23,41 @@ export class IsExistValidator implements ValidatorConstraintInterface {
     @Inject('EVENT_REPOSITORY') private readonly eventModel: typeof Event,
   ) {}
 
-  async validate(value: any, args: ValidationArguments) {
+  async validate(value: any, args: ValidationArguments): Promise<boolean> {
     const [modelName, columnName] = args.constraints;
-    let result;
-    if (modelName === 'User') {
-      result = await this.userModel.findOne({ where: { [columnName]: value } });
-    } else if (modelName === 'Project') {
-      result = await this.projectModel.findOne({
-        where: { [columnName]: value },
-      });
-    } else if (modelName === 'ProjectCollaborator') {
-      result = await this.collaboratorModel.findOne({
-        where: { [columnName]: value },
-      });
-    } else if (modelName === 'Task') {
-      result = await this.taskModel.findOne({
-        where: { [columnName]: value },
-      });
-    } else if (modelName === 'Event') {
-      result = await this.eventModel.findOne({
-        where: { [columnName]: value },
+    if (value === null || value === undefined) {
+      throw new BadRequestException(
+        `${columnName} in ${modelName} is required`,
+      );
+    }
+    let result: any;
+    try {
+      if (modelName === 'User') {
+        result = await this.userModel.findOne({
+          where: { [columnName]: value },
+        });
+      } else if (modelName === 'Project') {
+        result = await this.projectModel.findOne({
+          where: { [columnName]: value },
+        });
+      } else if (modelName === 'ProjectCollaborator') {
+        result = await this.collaboratorModel.findOne({
+          where: { [columnName]: value },
+        });
+      } else if (modelName === 'Task') {
+        result = await this.taskModel.findOne({
+          where: { [columnName]: value },
+        });
+      } else if (modelName === 'Event') {
+        result = await this.eventModel.findOne({
+          where: { [columnName]: value },
+        });
+      }
+    } catch (error) {
+      throw new InternalServerErrorException({
+        message: error.message,
+        statusCode: error.status || 500,
+        error: error.name || 'Internal Server Error',
       });
     }
     return !!result;

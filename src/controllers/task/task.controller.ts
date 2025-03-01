@@ -52,7 +52,7 @@ export class TaskController {
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
   findAll(@Req() req: Request) {
-    return this.taskService.getAll(req);
+    return this.taskService.getAllByProject(req);
   }
 
   @Get(':id')
