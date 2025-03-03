@@ -9,7 +9,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { ProjectService } from 'src/controllers/project/project.service';
 import { UNGUARD_KEY } from '../decorators';
-import { ErrorResponseDto, ResponseDto } from '../dto';
+import { ResponseDto } from '../dto';
 import { TaskService } from 'src/controllers/task/task.service';
 import { EventService } from 'src/controllers/event/event.service';
 import { Request } from 'express';
@@ -38,13 +38,11 @@ export class ProjectGuard implements CanActivate {
         throw new BadRequestException('Project ID is required');
       }
     } else if (path.includes('task')) {
-      let task: ResponseDto<Task> | ErrorResponseDto;
+      let task: ResponseDto<Task>;
       if (req.params.id) {
         const taskId = parseInt(req.params.id);
         task = await this.taskService.findOne(taskId);
-        if (task instanceof ErrorResponseDto) {
-          throw new NotFoundException(task.message);
-        } else if (!task.data) {
+        if (!task.data) {
           throw new NotFoundException(`Task with id ${taskId} is not found`);
         }
       }
@@ -59,13 +57,11 @@ export class ProjectGuard implements CanActivate {
         throw new BadRequestException('Project ID is required');
       }
     } else if (path.includes('event')) {
-      let event: ResponseDto<Event> | ErrorResponseDto;
+      let event: ResponseDto<Event>;
       if (req.params.id) {
         const eventId = parseInt(req.params.id);
         event = await this.eventService.findOne(eventId);
-        if (event instanceof ErrorResponseDto) {
-          throw new NotFoundException(event.message);
-        } else if (!event.data) {
+        if (!event.data) {
           throw new NotFoundException(`Event with id ${eventId} is not found`);
         }
       }
@@ -88,10 +84,6 @@ export class ProjectGuard implements CanActivate {
     }
 
     const project = await this.projectService.findOne(projectId);
-
-    if (project instanceof ErrorResponseDto) {
-      throw new NotFoundException(project.message);
-    }
 
     return project.data.id;
   }
@@ -116,9 +108,6 @@ export class ProjectGuard implements CanActivate {
     }
 
     const project = await this.projectService.findOne(projectId);
-    if (project instanceof ErrorResponseDto) {
-      throw new NotFoundException(project.message);
-    }
 
     const collaborator = await this.projectService.getCollaborators(projectId);
     const isOwner = project.data.userId === user.id;

@@ -1,6 +1,6 @@
-import { ExceptionFilterConfig } from '../config';
+import { HttpExceptionFilter } from '../filters';
 
-export const exceptionProvider = {
+export const ExceptionFilterProvider = {
   provide: 'EXCEPTION_FILTER',
-  useClass: ExceptionFilterConfig,
+  useClass: HttpExceptionFilter,
 };

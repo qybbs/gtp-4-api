@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
-import { exceptionProvider } from '../providers';
+import { Logger, Module } from '@nestjs/common';
+import { ExceptionFilterProvider } from '../providers';
 
 @Module({
-  providers: [exceptionProvider],
+  providers: [ExceptionFilterProvider, Logger],
+  exports: [ExceptionFilterProvider],
 })
 export class ExceptionModule {}

@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './controllers/user/user.module';
-import { MysqlModule, ValidatorModule } from './common/modules';
+import {
+  ExceptionModule,
+  MysqlModule,
+  ValidatorModule,
+} from './common/modules';
 import { AuthModule } from './controllers/auth/auth.module';
 import { ProjectModule } from './controllers/project/project.module';
 import { TaskModule } from './controllers/task/task.module';
@@ -19,6 +23,7 @@ import { CollaboratorModule } from './controllers/collaborator/collaborator.modu
     EventModule,
     ValidatorModule,
     CollaboratorModule,
+    ExceptionModule,
   ],
   controllers: [AppController],
   providers: [AppService],

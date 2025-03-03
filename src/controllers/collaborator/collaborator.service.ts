@@ -1,7 +1,12 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ProjectCollaborator } from 'src/common/models';
 import { CollaboratorDto } from '../project/dto/collaborator.dto';
-import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
+import { ResponseDto } from 'src/common/dto';
 
 @Injectable()
 export class CollaboratorService {
@@ -13,51 +18,46 @@ export class CollaboratorService {
   async addCollaborator(
     collaboratorDto: CollaboratorDto,
     req: Request,
-  ): Promise<ResponseDto | ErrorResponseDto> {
+  ): Promise<ResponseDto> {
     if (collaboratorDto.userId === req['user'].id) {
-      return new ErrorResponseDto({
-        message: 'You cannot add yourself as a collaborator',
-        statusCode: 400,
-        error: 'Bad Request',
-      });
+      throw new BadRequestException(
+        'You cannot add yourself as a collaborator',
+      );
     }
     try {
       const isExist = await this.collaboratorModel.findOne({
         where: { ...collaboratorDto },
       });
       if (isExist) {
-        return new ErrorResponseDto({
-          message: 'User is already a collaborator in this project',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
+        throw new BadRequestException(
+          'User is already a collaborator in this project',
+        );
       }
       const response = await this.collaboratorModel.create({
         ...collaboratorDto,
       });
       return new ResponseDto({
-        data: response,
+        statusCode: 201,
+        message: 'Collaborator added successfully',
+        data: {
+          userId: response.userId,
+          projectId: response.projectId,
+        },
       });
     } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
+      throw new Error(error.message);
     }
   }
 
   async removeCollaborator(
     collaboratorDto: CollaboratorDto,
     req: Request,
-  ): Promise<ResponseDto | ErrorResponseDto> {
+  ): Promise<ResponseDto> {
     try {
       if (collaboratorDto.userId == req['user'].id) {
-        return new ErrorResponseDto({
-          message: 'You cannot remove yourself',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
+        throw new BadRequestException(
+          'You cannot remove yourself as a collaborator',
+        );
       }
       const response = await this.collaboratorModel.destroy({
         where: { ...collaboratorDto },
@@ -68,14 +68,15 @@ export class CollaboratorService {
         );
       }
       return new ResponseDto({
-        data: `Collaborator with id ${collaboratorDto.userId} successfully removed from project with id ${collaboratorDto.projectId}`,
+        statusCode: 200,
+        message: 'Collaborator removed successfully',
+        data: {
+          userId: collaboratorDto.userId,
+          projectId: collaboratorDto.projectId,
+        },
       });
     } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
+      throw new Error(error.message);
     }
   }
 }

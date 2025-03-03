@@ -5,9 +5,13 @@ export const LoginSuccessResponse: ApiResponseNoStatusOptions = {
   schema: {
     type: 'object',
     properties: {
-      accessToken: {
-        type: 'string',
-        example: 'eyJhbGc***********NkmCQeNWUqOg',
+      statusCode: { type: 'number', example: 200 },
+      message: { type: 'string', example: 'Login successful' },
+      data: {
+        type: 'object',
+        properties: {
+          access_token: { type: 'string', example: 'eyJhbGci*****WPxBUXU' },
+        },
       },
     },
   },

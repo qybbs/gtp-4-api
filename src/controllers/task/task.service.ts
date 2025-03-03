@@ -1,5 +1,10 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ResponseDto } from 'src/common/dto';
 import { Project, ProjectCollaborator, Task } from 'src/common/models';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -11,7 +16,7 @@ export class TaskService {
     @Inject('PROJECT_REPOSITORY') private readonly projectModel: typeof Project,
   ) {}
 
-  async getAllByProject(req: Request): Promise<ResponseDto | ErrorResponseDto> {
+  async getAllByProject(req: Request): Promise<ResponseDto> {
     try {
       const userId = req['user'].id;
       const ownedTasks = await this.projectModel.findAll({
@@ -43,49 +48,45 @@ export class TaskService {
       if (ownedTasks.length === 0 && collabTasks.length === 0) {
         throw new NotFoundException('No tasks found');
       }
-      return new ResponseDto({ data: tasks });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
+      return new ResponseDto({
+        statusCode: 200,
+        message: 'Tasks found',
+        data: tasks,
       });
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 
-  async findOne(id: number): Promise<ResponseDto<Task> | ErrorResponseDto> {
+  async findOne(id: number): Promise<ResponseDto<Task>> {
     try {
       const task = await this.taskModel.findOne({ where: { id } });
-      return new ResponseDto<Task>({ data: task });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
+      return new ResponseDto<Task>({
+        statusCode: 200,
+        message: 'Task found',
+        data: task,
       });
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 
   async create(CreateTaskDto: CreateTaskDto) {
     try {
       const response = await this.taskModel.create({ ...CreateTaskDto });
-      return new ResponseDto({ data: response });
-    } catch (error) {
-      return new ErrorResponseDto({
-        message: 'An error occurred',
-        statusCode: 500,
-        error: 'Internal Server Error',
+      return new ResponseDto({
+        statusCode: 201,
+        message: 'Task created',
+        data: response,
       });
+    } catch (error) {
+      throw new Error(error.message);
     }
   }
 
   async update(id: number, UpdateTaskDto: UpdateTaskDto) {
     if (Object.keys(UpdateTaskDto).length === 0) {
-      return new ErrorResponseDto({
-        message: 'No fields to update',
-        statusCode: 400,
-        error: 'Bad Request',
-      });
+      throw new BadRequestException('No fields to update');
     }
     try {
       const response = await this.taskModel.update(
@@ -93,27 +94,24 @@ export class TaskService {
         { where: { id } },
       );
       return new ResponseDto({
+        statusCode: 200,
+        message: 'Task updated',
         data: {
-          message: `Task with id ${id} successfully updated`,
-          updated: response[0],
+          updated: response,
         },
       });
     } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: 400,
-        error: error.name || 'Bad Request',
-      });
+      throw new Error(error.message);
     }
   }
 
   async delete(id: number): Promise<ResponseDto> {
     const response = await this.taskModel.destroy({ where: { id } });
     return new ResponseDto({
+      statusCode: 200,
+      message: `Task with id ${id} successfully deleted`,
       data: {
-        message: `Task with id ${id} successfully deleted`,
-        deletedFields: response,
-        statusCode: 200,
+        deleted: response,
       },
     });
   }

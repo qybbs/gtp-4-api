@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from 'src/common/models';
-import { ErrorResponseDto, ResponseDto } from 'src/common/dto';
+import { ResponseDto } from 'src/common/dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -34,13 +34,7 @@ export class UserService {
       const response = await this.userModel.create({ ...createUserDto });
       return new ResponseDto({ data: response });
     } catch (error) {
-      if (error.name === 'SequelizeUniqueConstraintError') {
-        return new ErrorResponseDto({
-          message: 'User with this email or username already exists.',
-          statusCode: 400,
-          error: 'Bad Request',
-        });
-      }
+      throw new Error(error.message);
     }
   }
 
@@ -57,11 +51,7 @@ export class UserService {
         data: `User with id ${id} successfully updated`,
       });
     } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
+      throw new Error(error.message);
     }
   }
 
@@ -75,11 +65,7 @@ export class UserService {
         data: `User with id ${id} successfully deleted`,
       });
     } catch (error) {
-      return new ErrorResponseDto({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
+      throw new Error(error.message);
     }
   }
 }

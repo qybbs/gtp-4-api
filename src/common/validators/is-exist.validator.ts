@@ -27,7 +27,7 @@ export class IsExistValidator implements ValidatorConstraintInterface {
     const [modelName, columnName] = args.constraints;
     if (value === null || value === undefined) {
       throw new BadRequestException(
-        `${columnName} in ${modelName} is required`,
+        `${columnName} in ${modelName} cannot be empty`,
       );
     }
     let result: any;
@@ -54,11 +54,7 @@ export class IsExistValidator implements ValidatorConstraintInterface {
         });
       }
     } catch (error) {
-      throw new InternalServerErrorException({
-        message: error.message,
-        statusCode: error.status || 500,
-        error: error.name || 'Internal Server Error',
-      });
+      throw new Error(error.message);
     }
     return !!result;
   }

@@ -9,7 +9,7 @@ export * from './ok/collab-add.response';
 export * from './ok/collab-remove.response';
 export * from './unauthorized/invalid-token.response';
 export * from './unauthorized/wrong-login.response';
-export * from './bad-request/unique-register.response';
+export * from './bad-request/bad-req-register.response';
 export * from './bad-request/empty.response';
 export * from './not-found/not-found.response';
 export * from './not-found/get-all-not-found.response';

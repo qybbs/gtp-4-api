@@ -9,9 +9,10 @@ import {
 } from '@nestjs/swagger';
 import { RegisterDto } from './dto/register.dto';
 import {
+  BadReqRegisterResponse,
+  EmptyRequestResponse,
   LoginSuccessResponse,
   RegisterSuccessResponse,
-  UniqueRegisterResponse,
   WrongLoginResponse,
 } from 'src/common/responses';
 
@@ -25,6 +26,7 @@ export class AuthController {
     description: 'Login with username and password',
   })
   @ApiOkResponse(LoginSuccessResponse)
+  @ApiBadRequestResponse(EmptyRequestResponse)
   @ApiUnauthorizedResponse(WrongLoginResponse)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
@@ -33,7 +35,7 @@ export class AuthController {
   @Post('register')
   @ApiOperation({ summary: 'Register', description: 'Register a new user' })
   @ApiOkResponse(RegisterSuccessResponse)
-  @ApiBadRequestResponse(UniqueRegisterResponse)
+  @ApiBadRequestResponse(BadReqRegisterResponse)
   register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }

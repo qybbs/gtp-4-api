@@ -5,20 +5,33 @@ export const EmptyRequestResponse: ApiResponseNoStatusOptions = {
   schema: {
     type: 'object',
     properties: {
-      message: {
-        type: 'array',
-        items: {
-          type: 'string',
-          example: 'password should not be empty',
+      response: {
+        type: 'object',
+        properties: {
+          message: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: '{fieldName} should not be empty',
+            },
+          },
+          error: {
+            type: 'string',
+            example: 'Bad Request',
+          },
+          statusCode: {
+            type: 'number',
+            example: 400,
+          },
         },
       },
-      error: {
+      timestamp: {
         type: 'string',
-        example: 'Bad Request',
+        example: '2025-03-03T06:59:52.746Z',
       },
-      statusCode: {
-        type: 'integer',
-        example: 400,
+      path: {
+        type: 'string',
+        example: '/*',
       },
     },
   },
