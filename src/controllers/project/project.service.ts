@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Inject,
   Injectable,
   NotFoundException,
@@ -20,141 +21,117 @@ export class ProjectService {
   ) {}
 
   async getAll(req: Request): Promise<ResponseDto> {
-    try {
-      const userId = req['user'].id;
-      const ownedProjects = await this.projectModel.findAll({
-        where: { userId },
-        include: [
-          {
-            model: ProjectCollaborator,
-            attributes: ['userId'],
-          },
-        ],
-      });
-      const collabProjects = await this.projectModel.findAll({
-        include: [
-          {
-            model: ProjectCollaborator,
-            where: { userId: userId },
-            attributes: ['userId'],
-          },
-        ],
-      });
-      const projects = {
-        ownedProjects: ownedProjects,
-        collabProjects: collabProjects,
-      };
-      if (ownedProjects.length === 0 && collabProjects.length === 0) {
-        throw new NotFoundException('No projects found');
-      }
-      return new ResponseDto({
-        statusCode: 200,
-        message: 'Projects found',
-        data: projects,
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    const userId = req['user'].id;
+    const ownedProjects = await this.projectModel.findAll({
+      where: { userId },
+      include: [
+        {
+          model: ProjectCollaborator,
+          attributes: ['userId'],
+        },
+      ],
+    });
+    const collabProjects = await this.projectModel.findAll({
+      include: [
+        {
+          model: ProjectCollaborator,
+          where: { userId: userId },
+          attributes: ['userId'],
+        },
+      ],
+    });
+    const projects = {
+      ownedProjects: ownedProjects,
+      collabProjects: collabProjects,
+    };
+    if (ownedProjects.length === 0 && collabProjects.length === 0) {
+      throw new NotFoundException('No projects found');
     }
+    return new ResponseDto({
+      statusCode: 200,
+      message: 'Projects found',
+      data: projects,
+    });
   }
 
   async findOne(id: number): Promise<ResponseDto<Project>> {
-    try {
-      const project = await this.projectModel.findOne({
-        where: { id },
-        include: [{ model: ProjectCollaborator, attributes: ['userId'] }],
-      });
-      if (!project) {
-        throw new NotFoundException(`Project with id ${id} not found`);
-      }
-      return new ResponseDto<Project>({
-        statusCode: 200,
-        message: 'Project found',
-        data: project,
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    const project = await this.projectModel.findOne({
+      where: { id },
+      include: [{ model: ProjectCollaborator, attributes: ['userId'] }],
+    });
+    if (!project) {
+      throw new NotFoundException(`Project with id ${id} not found`);
     }
+    return new ResponseDto<Project>({
+      statusCode: 200,
+      message: 'Project found',
+      data: project,
+    });
   }
 
   async create(
     createProjectDto: CreateProjectDto,
     req: Request,
   ): Promise<ResponseDto> {
-    try {
-      const userId = req['user'].id;
-      const response = await this.projectModel.create({
-        ...createProjectDto,
-        userId,
-      });
-      return new ResponseDto({
-        statusCode: 201,
-        message: 'Project created successfully',
-        data: response,
-      });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const userId = req['user'].id;
+    const response = await this.projectModel.create({
+      ...createProjectDto,
+      userId,
+    });
+    return new ResponseDto({
+      statusCode: 201,
+      message: 'Project created successfully',
+      data: response,
+    });
   }
 
   async update(
     id: number,
     updateProjectDto: UpdateProjectDto,
   ): Promise<ResponseDto> {
-    try {
-      if (Object.keys(updateProjectDto).length === 0) {
-        throw new BadRequestException('No fields to update');
-      }
-      const response = await this.projectModel.update(
-        { ...updateProjectDto },
-        { where: { id } },
-      );
-      return new ResponseDto({
-        statusCode: 200,
-        message: `Project with id ${id} successfully updated`,
-        data: {
-          updated: response,
-        },
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    if (Object.keys(updateProjectDto).length === 0) {
+      throw new BadRequestException('No fields to update');
     }
+    const response = await this.projectModel.update(
+      { ...updateProjectDto },
+      { where: { id } },
+    );
+    return new ResponseDto({
+      statusCode: 200,
+      message: `Project with id ${id} successfully updated`,
+      data: {
+        updated: response,
+      },
+    });
   }
 
   async delete(id: number): Promise<ResponseDto> {
-    try {
-      const response = await this.projectModel.destroy({ where: { id } });
-      if (response === 0) {
-        throw new NotFoundException(`Project with id ${id} not found`);
-      }
-      return new ResponseDto({
-        statusCode: 200,
-        message: `Project with id ${id} successfully deleted`,
-        data: {
-          deleted: response,
-        },
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    const response = await this.projectModel.destroy({ where: { id } });
+    if (response === 0) {
+      throw new NotFoundException(`Project with id ${id} not found`);
     }
+    return new ResponseDto({
+      statusCode: 200,
+      message: `Project with id ${id} successfully deleted`,
+      data: {
+        deleted: response,
+      },
+    });
   }
 
   async getCollaborators(
     projectId: number,
   ): Promise<ResponseDto<ProjectCollaborator[]>> {
-    try {
-      const collaborators = await this.collaboratorModel.findAll({
-        where: { projectId },
-      });
-      if (collaborators.length === 0) {
-        throw new NotFoundException('No collaborators found');
-      }
-      return new ResponseDto<ProjectCollaborator[]>({
-        statusCode: 200,
-        message: 'Collaborators found',
-        data: collaborators,
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    const collaborators = await this.collaboratorModel.findAll({
+      where: { projectId },
+    });
+    if (collaborators.length === 0) {
+      throw new NotFoundException('No collaborators found');
     }
+    return new ResponseDto<ProjectCollaborator[]>({
+      statusCode: 200,
+      message: 'Collaborators found',
+      data: collaborators,
+    });
   }
 }

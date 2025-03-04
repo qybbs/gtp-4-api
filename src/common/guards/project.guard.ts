@@ -108,9 +108,13 @@ export class ProjectGuard implements CanActivate {
     }
 
     const project = await this.projectService.findOne(projectId);
+    const isOwner = project.data.userId === user.id;
+
+    if (isOwner) {
+      return true;
+    }
 
     const collaborator = await this.projectService.getCollaborators(projectId);
-    const isOwner = project.data.userId === user.id;
     const isCollaborator = collaborator.data.some(
       (c: { userId: number }) => c.userId === user.id,
     );

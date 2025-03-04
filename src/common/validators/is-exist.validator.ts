@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -24,12 +19,10 @@ export class IsExistValidator implements ValidatorConstraintInterface {
   ) {}
 
   async validate(value: any, args: ValidationArguments): Promise<boolean> {
-    const [modelName, columnName] = args.constraints;
     if (value === null || value === undefined) {
-      throw new BadRequestException(
-        `${columnName} in ${modelName} cannot be empty`,
-      );
+      throw new BadRequestException([`${args.property} should not be empty`]);
     }
+    const [modelName, columnName] = args.constraints;
     let result: any;
     try {
       if (modelName === 'User') {
@@ -59,8 +52,7 @@ export class IsExistValidator implements ValidatorConstraintInterface {
     return !!result;
   }
 
-  defaultMessage(args: ValidationArguments) {
-    const [modelName, columnName] = args.constraints;
-    return `${columnName} does not exist in ${modelName} data`;
+  defaultMessage(args: ValidationArguments): string {
+    return `${args.property} does not exist`;
   }
 }

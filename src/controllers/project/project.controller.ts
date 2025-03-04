@@ -64,10 +64,6 @@ export class ProjectController {
     summary: 'Get one project',
     description: 'Retrieve a project by projectId',
   })
-  @ApiHeader({
-    name: 'Authorization',
-    description: 'Bearer token',
-  })
   @ApiOkResponse(GetSuccessResponse)
   @ApiNotFoundResponse(NotFoundResponse)
   @ApiUnauthorizedResponse(InvalidTokenResponse)

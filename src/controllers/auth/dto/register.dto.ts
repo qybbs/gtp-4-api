@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Equals, IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsMatch } from 'src/common/decorators';
 import { IsUnique } from 'src/common/decorators/is-unique.decorator';
-import { IsMatch } from 'src/common/validators';
 
 export class RegisterDto {
   @ApiProperty({

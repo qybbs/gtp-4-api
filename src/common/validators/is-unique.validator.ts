@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
@@ -18,7 +18,10 @@ export class IsUniqueValidator implements ValidatorConstraintInterface {
     @Inject('EVENT_REPOSITORY') private readonly eventModel: typeof Event,
   ) {}
 
-  async validate(value: any, args: ValidationArguments) {
+  async validate(value: any, args: ValidationArguments): Promise<boolean> {
+    if (value === null || value === undefined) {
+      throw new BadRequestException(`${args.property} should not be empty`);
+    }
     const [modelName, columnName] = args.constraints;
     let result;
     if (modelName === 'User') {
@@ -45,8 +48,7 @@ export class IsUniqueValidator implements ValidatorConstraintInterface {
     return !result;
   }
 
-  defaultMessage(args: ValidationArguments) {
-    const [modelName, columnName] = args.constraints;
-    return `${columnName} already exist in ${modelName} data`;
+  defaultMessage(args: ValidationArguments): string {
+    return `${args.property} already exists`;
   }
 }
