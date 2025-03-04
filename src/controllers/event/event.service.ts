@@ -17,106 +17,106 @@ export class EventService {
   ) {}
 
   async getAllByProject(req: Request): Promise<ResponseDto> {
-    try {
-      const userId = req['user'].id;
-      const ownedEvents = await this.projectModel.findAll({
-        where: { userId },
-        attributes: ['id', 'name'],
-        include: [
-          {
-            model: Event,
-          },
-        ],
-      });
-      const collabEvents = await this.projectModel.findAll({
-        attributes: ['id', 'name'],
-        include: [
-          {
-            model: ProjectCollaborator,
-            where: { userId: userId },
-            attributes: [],
-          },
-          {
-            model: Event,
-          },
-        ],
-      });
-      const events = {
-        ownedEvents: ownedEvents,
-        collabEvents: collabEvents,
-      };
-      if (ownedEvents.length === 0 && collabEvents.length === 0) {
-        throw new NotFoundException('No tasks found');
-      }
-      return new ResponseDto({
-        statusCode: 200,
-        message: 'Events found',
-        data: events,
-      });
-    } catch (error) {
-      throw new Error(error.message);
+    const userId = req['user'].id;
+
+    const ownedEvents = await this.projectModel.findAll({
+      where: { userId },
+      attributes: ['id', 'name'],
+      include: [
+        {
+          model: Event,
+        },
+      ],
+    });
+
+    const collabEvents = await this.projectModel.findAll({
+      attributes: ['id', 'name'],
+      include: [
+        {
+          model: ProjectCollaborator,
+          where: { userId: userId },
+          attributes: [],
+        },
+        {
+          model: Event,
+        },
+      ],
+    });
+
+    const allOwnedEventsEmpty = ownedEvents.every(
+      (project) => project.events.length === 0,
+    );
+
+    const allCollabEventsEmpty = collabEvents.every(
+      (project) => project.events.length === 0,
+    );
+
+    if (allOwnedEventsEmpty && allCollabEventsEmpty) {
+      throw new NotFoundException('No tasks found');
     }
+
+    const events = {
+      ownedEvents: ownedEvents,
+      collabEvents: collabEvents,
+    };
+
+    return new ResponseDto({
+      statusCode: 200,
+      message: 'Events found',
+      data: events,
+    });
   }
 
   async findOne(id: number): Promise<ResponseDto<Event>> {
-    try {
-      const event = await this.eventModel.findOne({ where: { id } });
-      return new ResponseDto<Event>({
-        statusCode: 200,
-        message: 'Event found',
-        data: event,
-      });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const event = await this.eventModel.findOne({ where: { id } });
+
+    return new ResponseDto<Event>({
+      statusCode: 200,
+      message: 'Event found',
+      data: event,
+    });
   }
 
-  async create(CreateEventDto: CreateEventDto) {
-    try {
-      const response = await this.eventModel.create({ ...CreateEventDto });
-      return new ResponseDto({
-        statusCode: 201,
-        message: 'Event created',
-        data: response,
-      });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+  async create(CreateEventDto: CreateEventDto): Promise<ResponseDto> {
+    const response = await this.eventModel.create({ ...CreateEventDto });
+
+    return new ResponseDto({
+      statusCode: 201,
+      message: 'Event created',
+      data: response,
+    });
   }
 
-  async update(id: number, UpdateEventDto: UpdateEventDto) {
+  async update(
+    id: number,
+    UpdateEventDto: UpdateEventDto,
+  ): Promise<ResponseDto> {
     if (Object.keys(UpdateEventDto).length === 0) {
       throw new BadRequestException('No fields to update');
     }
-    try {
-      const response = await this.eventModel.update(
-        { ...UpdateEventDto },
-        { where: { id } },
-      );
-      return new ResponseDto({
-        statusCode: 200,
-        message: 'Event updated',
-        data: {
-          updated: response,
-        },
-      });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const response = await this.eventModel.update(
+      { ...UpdateEventDto },
+      { where: { id } },
+    );
+
+    return new ResponseDto({
+      statusCode: 200,
+      message: 'Event updated',
+      data: {
+        updated: response,
+      },
+    });
   }
 
   async delete(id: number): Promise<ResponseDto> {
-    try {
-      const response = await this.eventModel.destroy({ where: { id } });
-      return new ResponseDto({
-        statusCode: 200,
-        message: 'Event deleted',
-        data: {
-          deleted: response,
-        },
-      });
-    } catch (error) {
-      throw new Error(error.message);
-    }
+    const response = await this.eventModel.destroy({ where: { id } });
+
+    return new ResponseDto({
+      statusCode: 200,
+      message: 'Event deleted',
+      data: {
+        deleted: response,
+      },
+    });
   }
 }

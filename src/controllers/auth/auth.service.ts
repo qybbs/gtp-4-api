@@ -16,11 +16,15 @@ export class AuthService {
 
   async login(loginDto: LoginDto): Promise<ResponseDto> {
     const user = await this.userService.findOneByUsername(loginDto.username);
+
     const isMatch = await bcrypt.compare(loginDto.password, user.data.password);
+
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     const payload = { id: user.data.id, username: user.data.username };
+
     return new ResponseDto({
       statusCode: 200,
       message: 'Login successful',
@@ -32,7 +36,9 @@ export class AuthService {
 
   async register(registerDto: RegisterDto): Promise<ResponseDto> {
     const { confpassword, ...user } = registerDto;
+
     const response = await this.userService.create({ ...user });
+
     return new ResponseDto({
       statusCode: 201,
       message: 'User registered successfully',

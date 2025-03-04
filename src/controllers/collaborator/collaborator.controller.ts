@@ -23,7 +23,7 @@ import {
   InvalidTokenResponse,
   ProjectForbiddenResponse,
 } from 'src/common/responses';
-import { CollaboratorDto } from '../project/dto/collaborator.dto';
+import { CollaboratorDto } from './dto/collaborator.dto';
 import { ProjectGuard } from 'src/common/guards';
 
 @UseGuards(ProjectGuard)
