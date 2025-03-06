@@ -125,9 +125,6 @@ export class ProjectService {
     const collaborators = await this.collaboratorModel.findAll({
       where: { projectId },
     });
-    if (collaborators.length === 0) {
-      throw new NotFoundException('No collaborators found');
-    }
     return new ResponseDto<ProjectCollaborator[]>({
       statusCode: 200,
       message: 'Collaborators found',

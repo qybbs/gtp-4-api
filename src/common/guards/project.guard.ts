@@ -27,16 +27,15 @@ export class ProjectGuard implements CanActivate {
 
   async checkProjectId(req: Request): Promise<number> {
     const path = req.route.path;
+
     let projectId: number;
+
     if (path.includes('project')) {
       projectId = req.params.id
         ? req.params.id
         : req.body.projectId
           ? req.body.projectId
           : null;
-      if (!projectId) {
-        throw new BadRequestException('Project ID is required');
-      }
     } else if (path.includes('task')) {
       let task: ResponseDto<Task>;
       if (req.params.id) {
@@ -52,10 +51,6 @@ export class ProjectGuard implements CanActivate {
           : req.body.projectId
             ? req.body.projectId
             : null;
-      if (!projectId) {
-        console.log(task);
-        throw new BadRequestException('Project ID is required');
-      }
     } else if (path.includes('event')) {
       let event: ResponseDto<Event>;
       if (req.params.id) {
@@ -71,16 +66,14 @@ export class ProjectGuard implements CanActivate {
           : req.body.projectId
             ? req.body.projectId
             : null;
-      if (!projectId) {
-        throw new BadRequestException('Project ID is required');
-      }
     } else {
       projectId = req.query.projectId
         ? req.query.projectId
         : req.body.projectId;
-      if (!projectId) {
-        throw new BadRequestException('Project ID is required');
-      }
+    }
+
+    if (!projectId) {
+      throw new BadRequestException('projectId should not be empty');
     }
 
     const project = await this.projectService.findOne(projectId);
@@ -93,14 +86,17 @@ export class ProjectGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
+
     if (unGuard) {
       return true;
     }
 
     const request = context.switchToHttp().getRequest();
+
     const user = request.user;
 
     let projectId: number;
+
     try {
       projectId = await this.checkProjectId(request);
     } catch (error) {
@@ -108,6 +104,7 @@ export class ProjectGuard implements CanActivate {
     }
 
     const project = await this.projectService.findOne(projectId);
+
     const isOwner = project.data.userId === user.id;
 
     if (isOwner) {
@@ -115,6 +112,7 @@ export class ProjectGuard implements CanActivate {
     }
 
     const collaborator = await this.projectService.getCollaborators(projectId);
+
     const isCollaborator = collaborator.data.some(
       (c: { userId: number }) => c.userId === user.id,
     );

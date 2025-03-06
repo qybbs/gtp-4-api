@@ -22,33 +22,33 @@ export class IsExistValidator implements ValidatorConstraintInterface {
     if (value === null || value === undefined) {
       throw new BadRequestException([`${args.property} should not be empty`]);
     }
+
     const [modelName, columnName] = args.constraints;
+
     let result: any;
-    try {
-      if (modelName === 'User') {
-        result = await this.userModel.findOne({
-          where: { [columnName]: value },
-        });
-      } else if (modelName === 'Project') {
-        result = await this.projectModel.findOne({
-          where: { [columnName]: value },
-        });
-      } else if (modelName === 'ProjectCollaborator') {
-        result = await this.collaboratorModel.findOne({
-          where: { [columnName]: value },
-        });
-      } else if (modelName === 'Task') {
-        result = await this.taskModel.findOne({
-          where: { [columnName]: value },
-        });
-      } else if (modelName === 'Event') {
-        result = await this.eventModel.findOne({
-          where: { [columnName]: value },
-        });
-      }
-    } catch (error) {
-      throw new Error(error.message);
+
+    if (modelName === 'User') {
+      result = await this.userModel.findOne({
+        where: { [columnName]: value },
+      });
+    } else if (modelName === 'Project') {
+      result = await this.projectModel.findOne({
+        where: { [columnName]: value },
+      });
+    } else if (modelName === 'ProjectCollaborator') {
+      result = await this.collaboratorModel.findOne({
+        where: { [columnName]: value },
+      });
+    } else if (modelName === 'Task') {
+      result = await this.taskModel.findOne({
+        where: { [columnName]: value },
+      });
+    } else if (modelName === 'Event') {
+      result = await this.eventModel.findOne({
+        where: { [columnName]: value },
+      });
     }
+
     return !!result;
   }
 

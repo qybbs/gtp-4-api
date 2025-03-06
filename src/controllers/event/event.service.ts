@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -70,6 +71,10 @@ export class EventService {
   async findOne(id: number): Promise<ResponseDto<Event>> {
     const event = await this.eventModel.findOne({ where: { id } });
 
+    if (!event) {
+      throw new NotFoundException(`Event with id ${id} not found`);
+    }
+
     return new ResponseDto<Event>({
       statusCode: 200,
       message: 'Event found',
@@ -90,10 +95,34 @@ export class EventService {
   async update(
     id: number,
     UpdateEventDto: UpdateEventDto,
+    req: Request,
   ): Promise<ResponseDto> {
     if (Object.keys(UpdateEventDto).length === 0) {
       throw new BadRequestException('No fields to update');
     }
+
+    if (UpdateEventDto.projectId) {
+      const project = await this.projectModel.findOne({
+        where: { id: UpdateEventDto.projectId },
+        include: [{ model: ProjectCollaborator, attributes: ['userId'] }],
+      });
+
+      const isOwner = project.userId === req['user'].id;
+      const isCollaborator = project.collaborators.some(
+        (collab) => collab.userId === req['user'].id,
+      );
+
+      if (!isOwner && !isCollaborator) {
+        throw new ForbiddenException(
+          `Access to projectId ${UpdateEventDto.projectId} is forbidden`,
+        );
+      }
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
+    }
+
     const response = await this.eventModel.update(
       { ...UpdateEventDto },
       { where: { id } },

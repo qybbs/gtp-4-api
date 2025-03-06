@@ -94,8 +94,12 @@ export class TaskController {
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
-  update(@Param('id') id: number, @Body() UpdateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(id, UpdateTaskDto);
+  update(
+    @Param('id') id: number,
+    @Body() UpdateTaskDto: UpdateTaskDto,
+    @Req() req: Request,
+  ) {
+    return this.taskService.update(id, UpdateTaskDto, req);
   }
 
   @Delete(':id')

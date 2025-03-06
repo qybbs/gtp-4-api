@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Inject,
   Injectable,
   NotFoundException,
@@ -69,6 +70,10 @@ export class TaskService {
   async findOne(id: number): Promise<ResponseDto<Task>> {
     const task = await this.taskModel.findOne({ where: { id } });
 
+    if (!task) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
+
     return new ResponseDto<Task>({
       statusCode: 200,
       message: 'Task found',
@@ -86,9 +91,38 @@ export class TaskService {
     });
   }
 
-  async update(id: number, UpdateTaskDto: UpdateTaskDto): Promise<ResponseDto> {
+  async update(
+    id: number,
+    UpdateTaskDto: UpdateTaskDto,
+    req: Request,
+  ): Promise<ResponseDto> {
     if (Object.keys(UpdateTaskDto).length === 0) {
       throw new BadRequestException('No fields to update');
+    }
+
+    if (UpdateTaskDto.projectId && UpdateTaskDto.projectId !== undefined) {
+      const project = await this.projectModel.findOne({
+        where: { id: UpdateTaskDto.projectId },
+        include: [{ model: ProjectCollaborator, attributes: ['userId'] }],
+      });
+
+      const isOwner = project.userId === req['user'].id;
+      const isCollaborator = project.collaborators.some(
+        (collab) => collab.userId === req['user'].id,
+      );
+
+      console.log('isOwner', isOwner);
+      console.log('isCollaborator', isCollaborator);
+
+      if (!isOwner && !isCollaborator) {
+        throw new ForbiddenException(
+          `Access to projectId ${UpdateTaskDto.projectId} is forbidden`,
+        );
+      }
+
+      if (!project) {
+        throw new NotFoundException('Project not found');
+      }
     }
 
     const response = await this.taskModel.update(

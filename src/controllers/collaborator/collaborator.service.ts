@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Inject,
   Injectable,
+  MethodNotAllowedException,
   NotFoundException,
 } from '@nestjs/common';
 import { ProjectCollaborator } from 'src/common/models';
@@ -20,7 +21,7 @@ export class CollaboratorService {
     req: Request,
   ): Promise<ResponseDto> {
     if (collaboratorDto.userId === req['user'].id) {
-      throw new BadRequestException(
+      throw new MethodNotAllowedException(
         'You cannot add yourself as a collaborator',
       );
     }
@@ -54,7 +55,7 @@ export class CollaboratorService {
     req: Request,
   ): Promise<ResponseDto> {
     if (collaboratorDto.userId == req['user'].id) {
-      throw new BadRequestException(
+      throw new MethodNotAllowedException(
         'You cannot remove yourself as a collaborator',
       );
     }

@@ -94,8 +94,12 @@ export class EventController {
   @ApiUnauthorizedResponse(InvalidTokenResponse)
   @ApiForbiddenResponse(ProjectForbiddenResponse)
   @ApiNotFoundResponse(NotFoundResponse)
-  update(@Param('id') id: number, @Body() UpdateEventDto: UpdateEventDto) {
-    return this.eventService.update(id, UpdateEventDto);
+  update(
+    @Param('id') id: number,
+    @Body() UpdateEventDto: UpdateEventDto,
+    @Req() req: Request,
+  ) {
+    return this.eventService.update(id, UpdateEventDto, req);
   }
 
   @Delete(':id')

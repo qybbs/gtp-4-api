@@ -20,6 +20,14 @@ import {
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Post('register')
+  @ApiOperation({ summary: 'Register', description: 'Register a new user' })
+  @ApiOkResponse(RegisterSuccessResponse)
+  @ApiBadRequestResponse(BadReqRegisterResponse)
+  register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
+  }
+
   @Post('login')
   @ApiOperation({
     summary: 'Login',
@@ -30,13 +38,5 @@ export class AuthController {
   @ApiUnauthorizedResponse(WrongLoginResponse)
   login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
-  }
-
-  @Post('register')
-  @ApiOperation({ summary: 'Register', description: 'Register a new user' })
-  @ApiOkResponse(RegisterSuccessResponse)
-  @ApiBadRequestResponse(BadReqRegisterResponse)
-  register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
   }
 }
